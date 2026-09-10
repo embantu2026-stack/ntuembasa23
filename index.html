@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NTU EMBA 23屆學生會 | 年度活動</title>
+<meta name="description" content="台大 EMBA 第23屆學生會年度活動總覽與報名資訊">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a0f1a;
+    --bg-1:#111a2b;
+    --bg-2:#182238;
+    --card:#1a2438;
+    --card-hi:#212d47;
+    --line:rgba(255,255,255,0.08);
+    --gold:#d4af5a;
+    --gold-soft:#8f7a45;
+    --ink:#eef1f6;
+    --ink-dim:#9aa7bd;
+    --ink-faint:#6b789b;
+    --p1:#2f9c93;   /* Phase 1 啟動與凝聚 - teal */
+    --p1-soft:rgba(47,156,147,0.14);
+    --p2:#b5504a;   /* Phase 2 思維與高峰 - red */
+    --p2-soft:rgba(181,80,74,0.14);
+    --p3:#4a9a63;   /* Phase 3 聯動與傳承 - green */
+    --p3-soft:rgba(74,154,99,0.14);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(212,175,90,0.08), transparent 60%),
+      radial-gradient(1000px 700px at 100% 10%, rgba(47,156,147,0.06), transparent 55%),
+      var(--bg-0);
+    color:var(--ink);
+    font-family:'Noto Sans TC','Sora',sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num, .eyebrow-num{font-family:'Sora','Noto Sans TC',sans-serif;}
+
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- Header ---------- */
+  header.site{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,15,26,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .site-nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 24px;max-width:1080px;margin:0 auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:0.02em;}
+  .brand .mark{
+    width:30px;height:30px;border-radius:50%;
+    border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Sora',sans-serif;font-weight:700;color:var(--gold);font-size:13px;
+  }
+  .brand-text{display:flex;flex-direction:column;line-height:1.2;}
+  .brand-text .en{font-family:'Sora',sans-serif;font-size:10px;letter-spacing:0.14em;color:var(--ink-faint);}
+  .brand-text .zh{font-size:15px;color:var(--ink);}
+  .nav-cta{
+    font-size:14px;font-weight:600;color:var(--bg-0);
+    background:var(--gold);padding:9px 18px;border-radius:3px;
+    text-decoration:none;white-space:nowrap;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{padding:64px 0 40px;border-bottom:1px solid var(--line);}
+  .hero-kicker{
+    display:flex;align-items:center;gap:10px;
+    color:var(--gold);font-size:14px;font-weight:600;margin-bottom:22px;
+  }
+  .hero-kicker .rule{width:32px;height:1px;background:var(--gold-soft);}
+  h1.hero-title{
+    font-size:clamp(30px,5vw,46px);
+    font-weight:900;margin:0 0 18px;letter-spacing:-0.01em;
+    max-width:14ch;
+  }
+  .hero-sub{color:var(--ink-dim);font-size:16.5px;max-width:52ch;margin:0 0 30px;}
+
+  .phase-legend{display:flex;flex-wrap:wrap;gap:10px;}
+  .phase-chip{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 14px;border-radius:999px;
+    border:1px solid var(--line);font-size:13px;color:var(--ink-dim);
+  }
+  .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .dot.p1{background:var(--p1);} .dot.p2{background:var(--p2);} .dot.p3{background:var(--p3);}
+
+  /* ---------- Featured / urgent event ---------- */
+  .featured{padding:72px 0 20px;}
+  .featured-label{
+    font-size:13px;font-weight:700;color:var(--p1);
+    display:flex;align-items:center;gap:8px;margin-bottom:16px;
+  }
+  .featured-label .pulse{
+    width:7px;height:7px;border-radius:50%;background:var(--p1);
+    box-shadow:0 0 0 0 rgba(47,156,147,0.6);
+    animation:pulse 2s infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .featured-label .pulse{animation:none;} }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(47,156,147,0.55);}
+    70%{box-shadow:0 0 0 9px rgba(47,156,147,0);}
+    100%{box-shadow:0 0 0 0 rgba(47,156,147,0);}
+  }
+
+  .fcard{
+    border:1px solid var(--line);
+    background:linear-gradient(155deg,var(--card-hi),var(--card) 60%);
+    border-radius:6px;overflow:hidden;
+    display:grid;grid-template-columns:1.1fr 1fr;
+  }
+  @media (max-width:760px){ .fcard{grid-template-columns:1fr;} }
+
+  .fcard-visual{
+    position:relative;min-height:220px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(47,156,147,0.35), transparent 55%),
+      radial-gradient(circle at 75% 70%, rgba(212,175,90,0.25), transparent 50%),
+      #101827;
+    display:flex;align-items:center;justify-content:center;padding:28px;
+    border-right:1px solid var(--line);
+  }
+  @media (max-width:760px){ .fcard-visual{border-right:none;border-bottom:1px solid var(--line);} }
+  .fcard-visual .date-block{
+    text-align:center;
+  }
+  .fcard-visual .date-block .month{
+    font-family:'Sora',sans-serif;font-size:14px;letter-spacing:0.16em;color:var(--ink-dim);
+  }
+  .fcard-visual .date-block .day{
+    font-family:'Sora',sans-serif;font-size:76px;font-weight:800;line-height:1;color:var(--ink);
+    margin:6px 0;
+  }
+  .fcard-visual .date-block .weekday{color:var(--gold);font-size:14px;font-weight:600;}
+
+  .fcard-body{padding:32px;}
+  .fcard-body h2{font-size:22px;margin:0 0 6px;line-height:1.4;}
+  .fcard-body .venue{color:var(--ink-dim);font-size:14px;margin-bottom:20px;}
+
+  .meta-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;
+    padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    margin-bottom:20px;
+  }
+  .meta-item .k{font-size:12px;color:var(--ink-faint);margin-bottom:3px;}
+  .meta-item .v{font-size:14.5px;color:var(--ink);font-weight:500;}
+  .meta-item .v.accent{color:var(--gold);}
+
+  .fcard-body p.desc{color:var(--ink-dim);font-size:14.5px;margin:0 0 22px;}
+
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  .btn-primary{
+    display:inline-block;background:var(--gold);color:var(--bg-0);
+    font-weight:700;font-size:15px;padding:13px 26px;border-radius:3px;
+    text-decoration:none;
+  }
+  .btn-note{font-size:12.5px;color:var(--ink-faint);}
+
+  /* ---------- Timeline section ---------- */
+  .timeline-section{padding:70px 0 90px;}
+  .section-head{margin-bottom:44px;}
+  .section-head .featured-label{color:var(--ink-faint);}
+  .section-head .featured-label .pulse{display:none;}
+  .section-head h2{font-size:clamp(24px,3.4vw,32px);margin:0 0 10px;}
+  .section-head p{color:var(--ink-dim);font-size:15px;max-width:56ch;margin:0;}
+
+  .tl{position:relative;padding-left:28px;}
+  .tl::before{
+    content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(to bottom, var(--p1), var(--p2) 38%, var(--p3) 74%);
+    border-radius:2px;
+  }
+
+  .month-block{position:relative;padding-bottom:46px;}
+  .month-block:last-child{padding-bottom:0;}
+  .month-node{
+    position:absolute;left:-28px;top:4px;width:14px;height:14px;
+    border-radius:50%;border:3px solid var(--bg-0);
+  }
+  .month-block.p1 .month-node{background:var(--p1);}
+  .month-block.p2 .month-node{background:var(--p2);}
+  .month-block.p3 .month-node{background:var(--p3);}
+
+  .month-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;flex-wrap:wrap;}
+  .month-tag{
+    font-family:'Sora',sans-serif;font-weight:700;font-size:14px;
+    padding:4px 11px;border-radius:3px;color:var(--bg-0);
+  }
+  .month-block.p1 .month-tag{background:var(--p1);}
+  .month-block.p2 .month-tag{background:var(--p2);}
+  .month-block.p3 .month-tag{background:var(--p3);}
+  .month-title{font-size:18px;font-weight:700;color:var(--ink);}
+
+  .month-events{margin:12px 0 0;padding:0;list-style:none;}
+  .month-events li{
+    position:relative;padding:10px 16px 10px 18px;margin-bottom:8px;
+    background:var(--card);border:1px solid var(--line);border-radius:4px;
+    font-size:14.5px;color:var(--ink-dim);
+  }
+  .month-block.p1 .month-events li{border-left:2.5px solid var(--p1);}
+  .month-block.p2 .month-events li{border-left:2.5px solid var(--p2);}
+  .month-block.p3 .month-events li{border-left:2.5px solid var(--p3);}
+  .month-events li .ev-date{color:var(--ink);font-weight:600;margin-right:6px;}
+  .badge-tbd{
+    display:inline-block;margin-left:8px;font-size:11px;padding:1px 7px;
+    border-radius:999px;border:1px solid var(--ink-faint);color:var(--ink-faint);
+  }
+  .badge-live{
+    display:inline-block;margin-left:8px;font-size:11px;padding:1px 7px;
+    border-radius:999px;background:var(--p1-soft);color:var(--p1);font-weight:700;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--line);padding:36px 0;}
+  .footer-row{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+    color:var(--ink-faint);font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="site-nav">
+    <div class="brand">
+      <div class="mark">∞</div>
+      <div class="brand-text">
+        <span class="en">NTU EMBA · 23RD STUDENT ASSOCIATION</span>
+        <span class="zh">台大 EMBA 第23屆學生會</span>
+      </div>
+    </div>
+    <a class="nav-cta" href="#featured-event">最新活動</a>
+  </div>
+</header>
+
+<section class="featured" id="featured-event">
+  <div class="wrap">
+    <div class="featured-label"><span class="pulse"></span>報名進行中・9月14日截止</div>
+
+    <div class="fcard">
+      <div class="fcard-visual">
+        <div class="date-block">
+          <div class="month">SEP 2026</div>
+          <div class="day">28</div>
+          <div class="weekday">星期一・12:00–16:00</div>
+        </div>
+      </div>
+      <div class="fcard-body">
+        <h2>格子亮了，一起動起來！親子活動</h2>
+        <div class="venue">閃動格子 CyberCube 南港旗艦概念館</div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <div class="k">費用</div>
+            <div class="v accent">每人 NT$200</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">名額</div>
+            <div class="v">限額 100 人</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">報名截止</div>
+            <div class="v">9 月 14 日</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">主辦</div>
+            <div class="v">23屆活動組</div>
+          </div>
+        </div>
+
+        <p class="desc">
+          這是23屆活動組今年第一場活動，由學生會補助大部分費用，NT$200 即包含閃動格子入場、活動、保險及餐飲。當天也會安排教師節感謝儀式，邀請管院師長與23屆同學、家人一起參與，歡迎攜家帶眷同樂。
+        </p>
+
+        <div class="cta-row">
+          <a class="btn-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf249qDACfsay4axy3sm01NCZWyk42eqRo3KYaLbFX__Pk0ig/viewform" target="_blank" rel="noopener">立即報名</a>
+          <span class="btn-note">名額有限，額滿為止</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="timeline-section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="featured-label">全年總覽</div>
+      <h2>2026 年 9 月 — 2027 年 6 月</h2>
+      <p>依照三個階段排列，標示「待定」的項目日期或內容尚在確認，將於確定後更新。</p>
+    </div>
+
+    <div class="tl" id="timeline"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>台大 EMBA 第23屆學生會</span>
+    <span>活動資訊如有異動，依最新公告為準</span>
+  </div>
+</footer>
+
+<script>
+// ---- 活動資料：之後新增/修改活動，只要編輯這個陣列即可 ----
+const MONTHS = [
+  { tag:"9月", year:"2026", title:"情誼破冰與新生凝聚", phase:"p1", events:[
+    { date:"9/12", text:"校友基金會聯名講座：矽島躍升" },
+    { date:"9/15", text:"校友基金會聯名講座：AI聯盟" },
+    { date:"9/28", text:"閃動大作戰！親子光影闖關賽", live:true },
+  ]},
+  { tag:"10月", year:"2026", title:"公益、鏈結與競技", phase:"p1", events:[
+    { date:"10/3", text:"視障星光大道" },
+    { date:"10/17–18", text:"校友企業博覽會" },
+    { date:"10/24", text:"會長盃籃球賽" },
+  ]},
+  { tag:"11月", year:"2026", title:"思維躍遷與大師殿堂", phase:"p2", events:[
+    { date:"11月", text:"百川講堂", tbd:true },
+  ]},
+  { tag:"12月", year:"2026", title:"年度高峰與璀璨慶典", phase:"p2", events:[
+    { date:"12月", text:"品牌盛事：聖誕聯合 Party", tbd:true },
+  ]},
+  { tag:"1月", year:"2027", title:"極限應戰與高峰傳承", phase:"p2", events:[
+    { date:"1/17", text:"EMBA 校園馬拉松" },
+    { date:"1月", text:"百川講堂", tbd:true },
+  ]},
+  { tag:"2月", year:"2027", title:"爐邊共鳴與人文藝術", phase:"p2", events:[
+    { date:"2月", text:"電影欣賞會：冰原歷險記6", tbd:true },
+    { date:"4–10月", text:"爐邊會啟動（執行期間）" },
+  ]},
+  { tag:"3月", year:"2027", title:"校友聯動與慢壘爭霸", phase:"p3", events:[
+    { date:"3月", text:"會長盃慢速壘球積分賽", tbd:true },
+    { date:"3月", text:"校友基金會聯名麻將大賽", tbd:true },
+  ]},
+  { tag:"4月", year:"2027", title:"菁英學術與產業聚焦", phase:"p3", events:[
+    { date:"4月", text:"百川講堂", tbd:true },
+  ]},
+  { tag:"5月", year:"2027", title:"綠茵對決與公益揮桿", phase:"p3", events:[
+    { date:"5/21", text:"會長盃公益高爾夫球賽" },
+  ]},
+  { tag:"6月", year:"2027", title:"任期收尾與感恩傳承", phase:"p3", events:[
+    { date:"6月", text:"新生盃壘球賽", tbd:true },
+    { date:"6/30", text:"感恩餐會（任期圓滿）" },
+  ]},
+];
+
+const tl = document.getElementById('timeline');
+MONTHS.forEach(m => {
+  const block = document.createElement('div');
+  block.className = `month-block ${m.phase}`;
+
+  const eventsHtml = m.events.map(e => `
+    <li>
+      <span class="ev-date">${e.date}</span>${e.text}
+      ${e.live ? '<span class="badge-live">開放報名</span>' : ''}
+      ${e.tbd ? '<span class="badge-tbd">待定</span>' : ''}
+    </li>
+  `).join('');
+
+  block.innerHTML = `
+    <div class="month-node"></div>
+    <div class="month-head">
+      <span class="month-tag">${m.tag}</span>
+      <span class="month-title">${m.title}</span>
+    </div>
+    <ul class="month-events">${eventsHtml}</ul>
+  `;
+  tl.appendChild(block);
+});
+</script>
+
+</body>
+</html>
