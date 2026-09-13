@@ -46,10 +46,22 @@
   h1{font-size:clamp(24px,4vw,32px);margin:0 0 10px;font-weight:800;}
   .sub{color:var(--ink-dim);font-size:14.5px;margin:0 0 36px;max-width:56ch;}
 
+  /* ---- Not-open-yet panel ---- */
+  .locked-panel{
+    border:1px solid var(--line);background:linear-gradient(155deg,var(--card-hi),var(--card) 60%);
+    border-radius:6px;padding:40px 30px;text-align:center;
+  }
+  .locked-panel .eyebrow{justify-content:center;}
+  .locked-panel h2{font-size:20px;margin:6px 0 10px;}
+  .locked-panel p{color:var(--ink-dim);font-size:14px;margin:0;}
+  .locked-time{
+    font-family:'Sora',sans-serif;font-weight:700;color:var(--gold);font-size:22px;margin:14px 0;
+  }
+
   /* ---- Stock panel ---- */
   .stock-panel{
     border:1px solid var(--line);background:linear-gradient(155deg,var(--card-hi),var(--card) 60%);
-    border-radius:6px;padding:24px 26px;margin-bottom:36px;
+    border-radius:6px;padding:24px 26px;margin-bottom:28px;
   }
   .stock-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
   .stock-row .label{font-size:13.5px;color:var(--ink-dim);}
@@ -64,17 +76,32 @@
     color:#e2a8a4;font-size:13.5px;font-weight:600;
   }
 
+  /* ---- Payment panel ---- */
+  .payment-panel{
+    border:1px solid var(--line);background:var(--card);border-radius:6px;
+    padding:24px 26px;margin-bottom:28px;
+  }
+  .payment-panel h3{font-size:15px;margin:0 0 14px;color:var(--gold);}
+  .payment-panel p.instruction{font-size:13.5px;color:var(--ink-dim);margin:0 0 18px;}
+  .account-grid{
+    display:grid;grid-template-columns:auto 1fr;gap:8px 18px;font-size:14px;
+    padding:16px 18px;background:#101827;border:1px solid var(--line);border-radius:4px;
+  }
+  .account-grid .k{color:var(--ink-faint);}
+  .account-grid .v{font-weight:600;font-family:'Sora',sans-serif;letter-spacing:0.02em;}
+
   /* ---- Form ---- */
   form{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:30px 28px;}
   .field{margin-bottom:20px;}
   .field label{display:block;font-size:13.5px;color:var(--ink-dim);margin-bottom:6px;}
   .field .hint{font-size:11.5px;color:var(--ink-faint);margin-top:4px;}
-  input[type=text], input[type=tel], input[type=email], input[type=number]{
+  input[type=text], input[type=tel], input[type=email], input[type=number], textarea{
     width:100%;padding:11px 13px;border-radius:4px;
     border:1px solid var(--line);background:#101827;color:var(--ink);
     font-size:14.5px;font-family:inherit;
   }
-  input:focus{outline:none;border-color:var(--gold-soft);}
+  textarea{resize:vertical;min-height:64px;}
+  input:focus, textarea:focus{outline:none;border-color:var(--gold-soft);}
 
   .qty-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
   @media (max-width:560px){ .qty-grid{grid-template-columns:1fr;} }
@@ -105,6 +132,8 @@
   .msg.error{background:rgba(181,80,74,0.14);border:1px solid rgba(181,80,74,0.4);color:#e2a8a4;}
 
   .loading-note{font-size:12.5px;color:var(--ink-faint);margin-top:10px;}
+
+  #mainContent{display:none;}
 </style>
 </head>
 <body>
@@ -115,80 +144,107 @@
   <h1>台大 EMBA 30週年紀念酒 認購登記</h1>
   <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，主酒限量 500 支，額滿即停止開放。</p>
 
-  <div class="stock-panel">
-    <div class="stock-row">
-      <span class="label">主酒剩餘</span>
-      <span class="value remaining" id="mainRemainingText">載入中…</span>
-    </div>
-    <div class="bar-track"><div class="bar-fill" id="mainBar" style="width:0%"></div></div>
-
-    <div class="stock-row">
-      <span class="label">義父酒（前50組尊榮訂單贈送）剩餘</span>
-      <span class="value" id="godfatherRemainingText">載入中…</span>
-    </div>
-    <div class="stock-note">數字每次開啟頁面或送出表單後會更新，非即時同步所有使用者畫面。</div>
-    <div class="sold-out-flag" id="soldOutFlag">主酒已全數額滿，暫停接受新的認購登記。</div>
+  <div class="locked-panel" id="lockedPanel">
+    <div class="eyebrow">尚未開放</div>
+    <h2>認購登記尚未開始</h2>
+    <div class="locked-time" id="lockedTimeText">載入中…</div>
+    <p>時間一到頁面會自動開放，屆時重新整理即可看到表單。</p>
   </div>
 
-  <form id="orderForm">
-    <div class="two-col">
-      <div class="field">
-        <label>姓名 *</label>
-        <input type="text" id="name" required>
+  <div id="mainContent">
+    <div class="stock-panel">
+      <div class="stock-row">
+        <span class="label">主酒剩餘</span>
+        <span class="value remaining" id="mainRemainingText">載入中…</span>
       </div>
-      <div class="field">
-        <label>班級 *</label>
-        <input type="text" id="className" placeholder="例如 114C" required>
+      <div class="bar-track"><div class="bar-fill" id="mainBar" style="width:0%"></div></div>
+
+      <div class="stock-row">
+        <span class="label">義父酒（前50組尊榮訂單贈送）剩餘</span>
+        <span class="value" id="godfatherRemainingText">載入中…</span>
+      </div>
+      <div class="stock-note">數字每次開啟頁面或送出表單後會更新，非即時同步所有使用者畫面。</div>
+      <div class="sold-out-flag" id="soldOutFlag">主酒已全數額滿，暫停接受新的認購登記。</div>
+    </div>
+
+    <div class="payment-panel">
+      <h3>付款方式</h3>
+      <p class="instruction">
+        完成本頁登記後，請於 <strong>72 小時內</strong>將認購款項轉帳至下方帳戶，並於表單中填寫「轉帳帳號末五碼」以利核對。
+        若逾期尚未完成轉帳，該筆訂單將視為未成立並予以移除，敬請見諒；如遇特殊情況需要延展，歡迎透過學生會聯絡窗口協助處理。
+      </p>
+      <div class="account-grid">
+        <span class="k">銀行</span><span class="v">合作金庫銀行（006）民權分行</span>
+        <span class="k">戶名</span><span class="v">白淑貞</span>
+        <span class="k">帳號</span><span class="v">0770872050566</span>
       </div>
     </div>
 
-    <div class="field">
-      <label>認購方案數量</label>
-      <div class="qty-grid">
-        <div class="qty-card">
-          <div class="name">心意典藏組</div>
-          <div class="price">$12,800／組・1支</div>
-          <input type="number" id="qtyBasic" min="0" value="0">
+    <form id="orderForm">
+      <div class="two-col">
+        <div class="field">
+          <label>姓名 *</label>
+          <input type="text" id="name" required>
         </div>
-        <div class="qty-card">
-          <div class="name">經典典藏組</div>
-          <div class="price">$38,400／組・4支</div>
-          <input type="number" id="qtyClassic" min="0" value="0">
-        </div>
-        <div class="qty-card">
-          <div class="name">尊榮典藏組</div>
-          <div class="price">$76,800／組・8支+義父酒1支</div>
-          <input type="number" id="qtyPremium" min="0" value="0">
+        <div class="field">
+          <label>班級 *</label>
+          <input type="text" id="className" placeholder="例如 114C" required>
         </div>
       </div>
-    </div>
 
-    <div class="field">
-      <label>希望編號（可輸入多組，用逗號分隔，僅供登記意願，實際依競標規則）</label>
-      <input type="text" id="preferredNumbers" placeholder="例如 088, 168">
-    </div>
-
-    <div class="two-col">
       <div class="field">
-        <label>聯絡電話 *</label>
-        <input type="tel" id="phone" required>
+        <label>認購方案數量</label>
+        <div class="qty-grid">
+          <div class="qty-card">
+            <div class="name">心意典藏組</div>
+            <div class="price">$12,800／組・1支</div>
+            <input type="number" id="qtyBasic" min="0" value="0">
+          </div>
+          <div class="qty-card">
+            <div class="name">經典典藏組</div>
+            <div class="price">$38,400／組・4支</div>
+            <input type="number" id="qtyClassic" min="0" value="0">
+          </div>
+          <div class="qty-card">
+            <div class="name">尊榮典藏組</div>
+            <div class="price">$76,800／組・8支+義父酒1支</div>
+            <input type="number" id="qtyPremium" min="0" value="0">
+          </div>
+        </div>
       </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>聯絡電話 *</label>
+          <input type="tel" id="phone" required>
+        </div>
+        <div class="field">
+          <label>聯絡信箱 *</label>
+          <input type="email" id="email" required>
+        </div>
+      </div>
+
       <div class="field">
-        <label>聯絡信箱 *</label>
-        <input type="email" id="email" required>
+        <label>轉帳帳號末五碼 *</label>
+        <input type="text" id="transferLast5" placeholder="轉帳完成後填寫，供核對款項" maxlength="5" required>
       </div>
-    </div>
 
-    <div class="summary">
-      <span class="k">此次認購將動用主酒</span>
-      <span class="v" id="neededText">0 支</span>
-    </div>
+      <div class="field">
+        <label>宅配地址 *</label>
+        <textarea id="deliveryAddress" required placeholder="請填寫完整收件地址（含郵遞區號）"></textarea>
+      </div>
 
-    <button type="submit" class="btn-submit" id="submitBtn">送出認購登記</button>
-    <div class="loading-note" id="loadingNote"></div>
-    <div class="msg success" id="successMsg"></div>
-    <div class="msg error" id="errorMsg"></div>
-  </form>
+      <div class="summary">
+        <span class="k">此次認購將動用主酒</span>
+        <span class="v" id="neededText">0 支</span>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">送出認購登記</button>
+      <div class="loading-note" id="loadingNote"></div>
+      <div class="msg success" id="successMsg"></div>
+      <div class="msg error" id="errorMsg"></div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -196,6 +252,9 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAgKOloj-NOKkPY6LdLmKYsoH2upLSg-dLNJ3AqpsPP3s5Tl72WCv0rQiJk695wATq/exec';
 
 const els = {
+  lockedPanel: document.getElementById('lockedPanel'),
+  lockedTimeText: document.getElementById('lockedTimeText'),
+  mainContent: document.getElementById('mainContent'),
   mainRemainingText: document.getElementById('mainRemainingText'),
   mainBar: document.getElementById('mainBar'),
   godfatherRemainingText: document.getElementById('godfatherRemainingText'),
@@ -215,6 +274,20 @@ let currentStats = null;
 
 function renderStats(stats) {
   currentStats = stats;
+
+  if (stats.isOpen === false) {
+    els.lockedPanel.style.display = 'block';
+    els.mainContent.style.display = 'none';
+    if (stats.launchAt) {
+      const d = new Date(stats.launchAt);
+      els.lockedTimeText.textContent = d.toLocaleString('zh-TW', { dateStyle: 'long', timeStyle: 'short' }) + ' 開放';
+    }
+    return;
+  }
+
+  els.lockedPanel.style.display = 'none';
+  els.mainContent.style.display = 'block';
+
   els.mainRemainingText.textContent = `${stats.mainWineRemaining} / ${stats.mainWineTotal} 支`;
   const pct = Math.max(0, Math.min(100, (stats.mainWineUsed / stats.mainWineTotal) * 100));
   els.mainBar.style.width = pct + '%';
@@ -263,9 +336,10 @@ els.form.addEventListener('submit', async (e) => {
     qtyBasic: els.qtyBasic.value,
     qtyClassic: els.qtyClassic.value,
     qtyPremium: els.qtyPremium.value,
-    preferredNumbers: document.getElementById('preferredNumbers').value,
     phone: document.getElementById('phone').value,
     email: document.getElementById('email').value,
+    transferLast5: document.getElementById('transferLast5').value,
+    deliveryAddress: document.getElementById('deliveryAddress').value,
   };
 
   try {
@@ -278,7 +352,7 @@ els.form.addEventListener('submit', async (e) => {
     els.loadingNote.textContent = '';
 
     if (data.ok) {
-      els.successMsg.textContent = '認購登記已送出，感謝您的支持！';
+      els.successMsg.textContent = '認購登記已送出，感謝您的支持！請記得於 72 小時內完成轉帳。';
       els.successMsg.style.display = 'block';
       els.form.reset();
       renderStats(data.stats);
