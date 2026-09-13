@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台大 EMBA 30週年紀念酒 認購登記（測試版）</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a0f1a;
+    --card:#1a2438;
+    --card-hi:#212d47;
+    --line:rgba(255,255,255,0.08);
+    --gold:#d4af5a;
+    --gold-soft:#8f7a45;
+    --ink:#eef1f6;
+    --ink-dim:#9aa7bd;
+    --ink-faint:#6b789b;
+    --ok:#2f9c93;
+    --warn:#b5504a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(212,175,90,0.08), transparent 60%),
+      radial-gradient(1000px 700px at 100% 10%, rgba(47,156,147,0.06), transparent 55%),
+      var(--bg-0);
+    color:var(--ink);
+    font-family:'Noto Sans TC','Sora',sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:56px 24px 80px;}
+
+  .badge-test{
+    display:inline-block;font-size:12px;font-weight:700;color:var(--warn);
+    border:1px solid rgba(181,80,74,0.5);background:rgba(181,80,74,0.1);
+    padding:4px 10px;border-radius:999px;margin-bottom:20px;
+  }
+
+  .eyebrow{color:var(--gold);font-size:13px;font-weight:600;letter-spacing:0.05em;margin-bottom:10px;}
+  h1{font-size:clamp(24px,4vw,32px);margin:0 0 10px;font-weight:800;}
+  .sub{color:var(--ink-dim);font-size:14.5px;margin:0 0 36px;max-width:56ch;}
+
+  /* ---- Stock panel ---- */
+  .stock-panel{
+    border:1px solid var(--line);background:linear-gradient(155deg,var(--card-hi),var(--card) 60%);
+    border-radius:6px;padding:24px 26px;margin-bottom:36px;
+  }
+  .stock-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .stock-row .label{font-size:13.5px;color:var(--ink-dim);}
+  .stock-row .value{font-family:'Sora',sans-serif;font-weight:700;font-size:15px;}
+  .stock-row .value.remaining{color:var(--gold);}
+  .bar-track{height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:20px;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-soft),var(--gold));border-radius:999px;transition:width .3s ease;}
+  .stock-note{font-size:12px;color:var(--ink-faint);}
+  .sold-out-flag{
+    display:none;margin-top:14px;padding:10px 14px;border-radius:4px;
+    background:rgba(181,80,74,0.14);border:1px solid rgba(181,80,74,0.4);
+    color:#e2a8a4;font-size:13.5px;font-weight:600;
+  }
+
+  /* ---- Form ---- */
+  form{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:30px 28px;}
+  .field{margin-bottom:20px;}
+  .field label{display:block;font-size:13.5px;color:var(--ink-dim);margin-bottom:6px;}
+  .field .hint{font-size:11.5px;color:var(--ink-faint);margin-top:4px;}
+  input[type=text], input[type=tel], input[type=email], input[type=number]{
+    width:100%;padding:11px 13px;border-radius:4px;
+    border:1px solid var(--line);background:#101827;color:var(--ink);
+    font-size:14.5px;font-family:inherit;
+  }
+  input:focus{outline:none;border-color:var(--gold-soft);}
+
+  .qty-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media (max-width:560px){ .qty-grid{grid-template-columns:1fr;} }
+  .qty-card{border:1px solid var(--line);border-radius:4px;padding:14px;background:#101827;}
+  .qty-card .name{font-size:13.5px;font-weight:700;margin-bottom:2px;}
+  .qty-card .price{font-size:12px;color:var(--gold);margin-bottom:10px;}
+  .qty-card .desc{font-size:11.5px;color:var(--ink-faint);margin-bottom:10px;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:560px){ .two-col{grid-template-columns:1fr;} }
+
+  .summary{
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:16px 0;margin:24px 0;display:flex;justify-content:space-between;align-items:center;
+  }
+  .summary .k{font-size:13px;color:var(--ink-faint);}
+  .summary .v{font-family:'Sora',sans-serif;font-weight:700;font-size:20px;}
+  .summary .v.warn{color:var(--warn);}
+
+  .btn-submit{
+    width:100%;background:var(--gold);color:var(--bg-0);border:none;
+    font-weight:700;font-size:15.5px;padding:14px;border-radius:4px;cursor:pointer;
+  }
+  .btn-submit:disabled{background:#4a4536;color:#8b8672;cursor:not-allowed;}
+
+  .msg{margin-top:16px;padding:12px 14px;border-radius:4px;font-size:13.5px;display:none;}
+  .msg.success{background:rgba(47,156,147,0.14);border:1px solid rgba(47,156,147,0.4);color:#8fd4cc;}
+  .msg.error{background:rgba(181,80,74,0.14);border:1px solid rgba(181,80,74,0.4);color:#e2a8a4;}
+
+  .loading-note{font-size:12.5px;color:var(--ink-faint);margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge-test">內部測試頁・尚未正式對外公告</span>
+  <div class="eyebrow">NTU EMBA 30TH ANNIVERSARY</div>
+  <h1>台大 EMBA 30週年紀念酒 認購登記</h1>
+  <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，主酒限量 500 支，額滿即停止開放。</p>
+
+  <div class="stock-panel">
+    <div class="stock-row">
+      <span class="label">主酒剩餘</span>
+      <span class="value remaining" id="mainRemainingText">載入中…</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="mainBar" style="width:0%"></div></div>
+
+    <div class="stock-row">
+      <span class="label">義父酒（前50組尊榮訂單贈送）剩餘</span>
+      <span class="value" id="godfatherRemainingText">載入中…</span>
+    </div>
+    <div class="stock-note">數字每次開啟頁面或送出表單後會更新，非即時同步所有使用者畫面。</div>
+    <div class="sold-out-flag" id="soldOutFlag">主酒已全數額滿，暫停接受新的認購登記。</div>
+  </div>
+
+  <form id="orderForm">
+    <div class="two-col">
+      <div class="field">
+        <label>姓名 *</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="field">
+        <label>班級 *</label>
+        <input type="text" id="className" placeholder="例如 114C" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>認購方案數量</label>
+      <div class="qty-grid">
+        <div class="qty-card">
+          <div class="name">心意典藏組</div>
+          <div class="price">$12,800／組・1支</div>
+          <input type="number" id="qtyBasic" min="0" value="0">
+        </div>
+        <div class="qty-card">
+          <div class="name">經典典藏組</div>
+          <div class="price">$38,400／組・4支</div>
+          <input type="number" id="qtyClassic" min="0" value="0">
+        </div>
+        <div class="qty-card">
+          <div class="name">尊榮典藏組</div>
+          <div class="price">$76,800／組・8支+義父酒1支</div>
+          <input type="number" id="qtyPremium" min="0" value="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>希望編號（可輸入多組，用逗號分隔，僅供登記意願，實際依競標規則）</label>
+      <input type="text" id="preferredNumbers" placeholder="例如 088, 168">
+    </div>
+
+    <div class="two-col">
+      <div class="field">
+        <label>聯絡電話 *</label>
+        <input type="tel" id="phone" required>
+      </div>
+      <div class="field">
+        <label>聯絡信箱 *</label>
+        <input type="email" id="email" required>
+      </div>
+    </div>
+
+    <div class="summary">
+      <span class="k">此次認購將動用主酒</span>
+      <span class="v" id="neededText">0 支</span>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submitBtn">送出認購登記</button>
+    <div class="loading-note" id="loadingNote"></div>
+    <div class="msg success" id="successMsg"></div>
+    <div class="msg error" id="errorMsg"></div>
+  </form>
+</div>
+
+<script>
+// ⚠️ 部署 Apps Script 後，把下面這行換成你的網頁應用程式網址（.../exec 結尾）
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAgKOloj-NOKkPY6LdLmKYsoH2upLSg-dLNJ3AqpsPP3s5Tl72WCv0rQiJk695wATq/exec';
+
+const els = {
+  mainRemainingText: document.getElementById('mainRemainingText'),
+  mainBar: document.getElementById('mainBar'),
+  godfatherRemainingText: document.getElementById('godfatherRemainingText'),
+  soldOutFlag: document.getElementById('soldOutFlag'),
+  qtyBasic: document.getElementById('qtyBasic'),
+  qtyClassic: document.getElementById('qtyClassic'),
+  qtyPremium: document.getElementById('qtyPremium'),
+  neededText: document.getElementById('neededText'),
+  submitBtn: document.getElementById('submitBtn'),
+  loadingNote: document.getElementById('loadingNote'),
+  successMsg: document.getElementById('successMsg'),
+  errorMsg: document.getElementById('errorMsg'),
+  form: document.getElementById('orderForm'),
+};
+
+let currentStats = null;
+
+function renderStats(stats) {
+  currentStats = stats;
+  els.mainRemainingText.textContent = `${stats.mainWineRemaining} / ${stats.mainWineTotal} 支`;
+  const pct = Math.max(0, Math.min(100, (stats.mainWineUsed / stats.mainWineTotal) * 100));
+  els.mainBar.style.width = pct + '%';
+  els.godfatherRemainingText.textContent = `${stats.godfatherRemaining} / ${stats.godfatherTotal} 支`;
+
+  if (stats.mainWineRemaining <= 0) {
+    els.soldOutFlag.style.display = 'block';
+    els.submitBtn.disabled = true;
+  } else {
+    els.soldOutFlag.style.display = 'none';
+  }
+  updateNeeded();
+}
+
+function updateNeeded() {
+  const n1 = parseInt(els.qtyBasic.value, 10) || 0;
+  const n2 = parseInt(els.qtyClassic.value, 10) || 0;
+  const n3 = parseInt(els.qtyPremium.value, 10) || 0;
+  const needed = n1 * 1 + n2 * 4 + n3 * 8;
+  els.neededText.textContent = needed + ' 支';
+  els.neededText.classList.toggle('warn', currentStats && needed > currentStats.mainWineRemaining);
+}
+
+[els.qtyBasic, els.qtyClassic, els.qtyPremium].forEach(el => el.addEventListener('input', updateNeeded));
+
+async function loadStats() {
+  try {
+    const res = await fetch(SCRIPT_URL, { method: 'GET' });
+    const data = await res.json();
+    if (data.ok) renderStats(data);
+  } catch (err) {
+    els.loadingNote.textContent = '目前無法讀取即時庫存，請稍後重新整理頁面。';
+  }
+}
+
+els.form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  els.successMsg.style.display = 'none';
+  els.errorMsg.style.display = 'none';
+  els.submitBtn.disabled = true;
+  els.loadingNote.textContent = '送出中，請稍候…';
+
+  const payload = {
+    name: document.getElementById('name').value,
+    className: document.getElementById('className').value,
+    qtyBasic: els.qtyBasic.value,
+    qtyClassic: els.qtyClassic.value,
+    qtyPremium: els.qtyPremium.value,
+    preferredNumbers: document.getElementById('preferredNumbers').value,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+  };
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // 避免觸發 CORS 預檢請求
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    els.loadingNote.textContent = '';
+
+    if (data.ok) {
+      els.successMsg.textContent = '認購登記已送出，感謝您的支持！';
+      els.successMsg.style.display = 'block';
+      els.form.reset();
+      renderStats(data.stats);
+    } else {
+      els.errorMsg.textContent = data.error || '送出失敗，請再試一次。';
+      els.errorMsg.style.display = 'block';
+      if (data.stats) renderStats(data.stats);
+    }
+  } catch (err) {
+    els.loadingNote.textContent = '';
+    els.errorMsg.textContent = '網路連線異常，請稍後再試。';
+    els.errorMsg.style.display = 'block';
+  } finally {
+    if (!currentStats || currentStats.mainWineRemaining > 0) {
+      els.submitBtn.disabled = false;
+    }
+  }
+});
+
+loadStats();
+</script>
+</body>
+</html>
