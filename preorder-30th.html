@@ -46,6 +46,18 @@
   h1{font-size:clamp(24px,4vw,32px);margin:0 0 10px;font-weight:800;}
   .sub{color:var(--ink-dim);font-size:14.5px;margin:0 0 36px;max-width:56ch;}
 
+  /* ---- Product gallery ---- */
+  .product-gallery{
+    display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px;
+  }
+  @media (max-width:560px){ .product-gallery{grid-template-columns:1fr;} }
+  .product-gallery figure{margin:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--card);}
+  .product-gallery img{width:100%;height:auto;display:block;}
+  .product-gallery figcaption{
+    padding:12px 14px;font-size:13px;color:var(--ink-dim);text-align:center;
+    border-top:1px solid var(--line);
+  }
+
   /* ---- Not-open-yet panel ---- */
   .locked-panel{
     border:1px solid var(--line);background:linear-gradient(155deg,var(--card-hi),var(--card) 60%);
@@ -143,6 +155,17 @@
   <div class="eyebrow">NTU EMBA 30TH ANNIVERSARY</div>
   <h1>台大 EMBA 30週年紀念酒 認購登記</h1>
   <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，主酒限量 500 支，額滿即停止開放。</p>
+
+  <div class="product-gallery">
+    <figure>
+      <img src="images/ntu-emba-30th-classic-wine.jpg" alt="台大 EMBA 30週年紀念酒 雪莉桶威士忌調和酒">
+      <figcaption>經典獨奏｜雪莉桶威士忌調和酒</figcaption>
+    </figure>
+    <figure>
+      <img src="images/ntu-emba-30th-godfather-wine.jpg" alt="義父IF 尊爵典藏 時光領袖">
+      <figcaption>義父 IF｜尊爵典藏・時光領袖</figcaption>
+    </figure>
+  </div>
 
   <div class="locked-panel" id="lockedPanel">
     <div class="eyebrow">尚未開放</div>
@@ -249,7 +272,7 @@
 
 <script>
 // ⚠️ 部署 Apps Script 後，把下面這行換成你的網頁應用程式網址（.../exec 結尾）
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAgKOloj-NOKkPY6LdLmKYsoH2upLSg-dLNJ3AqpsPP3s5Tl72WCv0rQiJk695wATq/exec';
+const SCRIPT_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
 const els = {
   lockedPanel: document.getElementById('lockedPanel'),
