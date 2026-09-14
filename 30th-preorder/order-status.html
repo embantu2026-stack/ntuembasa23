@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>訂單狀態查詢｜台大 EMBA 30週年紀念酒</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a0f1a; --card:#1a2438; --card-hi:#212d47; --line:rgba(255,255,255,0.08);
+    --gold:#d4af5a; --gold-soft:#8f7a45; --ink:#eef1f6; --ink-dim:#9aa7bd; --ink-faint:#6b789b;
+    --ok:#2f9c93; --warn:#b5504a; --pending:#c99a3f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: radial-gradient(1200px 600px at 15% -10%, rgba(212,175,90,0.08), transparent 60%), var(--bg-0);
+    color:var(--ink); font-family:'Noto Sans TC','Sora',sans-serif; line-height:1.65;
+  }
+  .wrap{max-width:600px;margin:0 auto;padding:56px 24px 80px;}
+  .eyebrow{color:var(--gold);font-size:13px;font-weight:600;margin-bottom:10px;}
+  h1{font-size:clamp(22px,4vw,28px);margin:0 0 30px;font-weight:800;}
+
+  .panel{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:26px;margin-bottom:20px;}
+  .row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .row:last-child{border-bottom:none;}
+  .row .k{color:var(--ink-faint);}
+  .row .v{font-weight:600;}
+
+  .status-badge{
+    display:inline-block;padding:6px 16px;border-radius:999px;font-weight:700;font-size:14px;margin-bottom:6px;
+  }
+  .status-badge.paid{background:rgba(47,156,147,0.16);color:#8fd4cc;}
+  .status-badge.pending{background:rgba(201,154,63,0.16);color:#e8c67e;}
+  .status-badge.cancelled{background:rgba(181,80,74,0.16);color:#e2a8a4;}
+
+  label{display:block;font-size:13.5px;color:var(--ink-dim);margin-bottom:6px;}
+  input[type=text]{
+    width:100%;padding:11px 13px;border-radius:4px;border:1px solid var(--line);
+    background:#101827;color:var(--ink);font-size:14.5px;font-family:inherit;
+  }
+  .btn{background:var(--gold);color:var(--bg-0);border:none;font-weight:700;font-size:14.5px;
+    padding:12px 20px;border-radius:4px;cursor:pointer;margin-top:12px;}
+  .btn:disabled{background:#4a4536;color:#8b8672;cursor:not-allowed;}
+
+  .msg{margin-top:14px;padding:10px 14px;border-radius:4px;font-size:13.5px;display:none;}
+  .msg.success{background:rgba(47,156,147,0.14);color:#8fd4cc;}
+  .msg.error{background:rgba(181,80,74,0.14);color:#e2a8a4;}
+  .note{font-size:12.5px;color:var(--ink-faint);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">NTU EMBA 30TH ANNIVERSARY</div>
+  <h1>訂單狀態查詢</h1>
+
+  <div id="loadingText" style="color:var(--ink-dim);font-size:14px;">查詢中…</div>
+
+  <div id="content" style="display:none;">
+    <div id="statusBadge"></div>
+
+    <div class="panel" style="margin-top:14px;">
+      <div class="row"><span class="k">訂單編號</span><span class="v" id="oOrderId"></span></div>
+      <div class="row"><span class="k">姓名</span><span class="v" id="oName"></span></div>
+      <div class="row"><span class="k">班級</span><span class="v" id="oClass"></span></div>
+      <div class="row"><span class="k">心意典藏組</span><span class="v" id="oBasic"></span></div>
+      <div class="row"><span class="k">經典典藏組</span><span class="v" id="oClassic"></span></div>
+      <div class="row"><span class="k">尊榮典藏組</span><span class="v" id="oPremium"></span></div>
+      <div class="row"><span class="k">動用主酒</span><span class="v" id="oNeeded"></span></div>
+      <div class="row"><span class="k">應匯款金額</span><span class="v" id="oAmount" style="color:var(--gold);font-size:16px;"></span></div>
+      <div class="row"><span class="k">宅配地址</span><span class="v" id="oAddress"></span></div>
+      <div class="row"><span class="k">目前登記的末五碼</span><span class="v" id="oLast5"></span></div>
+    </div>
+
+    <div class="panel" id="editPanel">
+      <label>補填 / 修改轉帳帳號末五碼</label>
+      <input type="text" id="newLast5" maxlength="5" placeholder="輸入 5 碼數字">
+      <button class="btn" id="saveBtn">更新末五碼</button>
+      <div class="msg success" id="successMsg"></div>
+      <div class="msg error" id="errorMsg"></div>
+    </div>
+    <p class="note" id="lockedNote" style="display:none;">此訂單狀態已無法修改末五碼，如有問題請聯繫財務長。</p>
+  </div>
+
+  <div id="notFound" style="display:none;color:var(--ink-dim);font-size:14px;"></div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdgdRUvqsHWUcP6rF70dPN3Vs2Na65ak8yjcTrzhmDB2lWEqWH2s6S-MaJrWO5jwpj0g/exec';
+
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get('id');
+
+const statusMeta = {
+  '已付款': { cls: 'paid', text: '已付款' },
+  '付款待確認': { cls: 'pending', text: '付款待確認' },
+  '逾期付款被取消': { cls: 'cancelled', text: '逾期付款被取消' },
+};
+
+async function load() {
+  if (!orderId) {
+    showNotFound('連結缺少訂單編號，請確認是從確認信中的連結點入。');
+    return;
+  }
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=order_status&id=' + encodeURIComponent(orderId));
+    const data = await res.json();
+    if (!data.ok) {
+      showNotFound(data.error || '查無此訂單');
+      return;
+    }
+    render(data.order);
+  } catch (err) {
+    showNotFound('查詢時發生網路錯誤，請稍後再試。');
+  }
+}
+
+function showNotFound(text) {
+  document.getElementById('loadingText').style.display = 'none';
+  const el = document.getElementById('notFound');
+  el.textContent = text;
+  el.style.display = 'block';
+}
+
+function render(order) {
+  document.getElementById('loadingText').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+
+  const meta = statusMeta[order.status] || { cls: 'pending', text: order.status };
+  document.getElementById('statusBadge').innerHTML =
+    '<span class="status-badge ' + meta.cls + '">' + meta.text + '</span>';
+
+  document.getElementById('oOrderId').textContent = order.orderId;
+  document.getElementById('oName').textContent = order.name;
+  document.getElementById('oClass').textContent = order.className;
+  document.getElementById('oBasic').textContent = order.qtyBasic + ' 組';
+  document.getElementById('oClassic').textContent = order.qtyClassic + ' 組';
+  document.getElementById('oPremium').textContent = order.qtyPremium + ' 組';
+  document.getElementById('oNeeded').textContent = order.mainWineNeeded + ' 支';
+  document.getElementById('oAmount').textContent = 'NT$' + Number(order.totalAmount || 0).toLocaleString('en-US');
+  document.getElementById('oAddress').textContent = order.deliveryAddress;
+  document.getElementById('oLast5').textContent = order.transferLast5 || '（尚未填寫）';
+
+  if (order.status === '已付款' || order.status === '逾期付款被取消') {
+    document.getElementById('editPanel').style.display = 'none';
+    document.getElementById('lockedNote').style.display = 'block';
+  }
+}
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const newLast5 = document.getElementById('newLast5').value.trim();
+  const successMsg = document.getElementById('successMsg');
+  const errorMsg = document.getElementById('errorMsg');
+  successMsg.style.display = 'none';
+  errorMsg.style.display = 'none';
+
+  if (!newLast5) {
+    errorMsg.textContent = '請輸入末五碼';
+    errorMsg.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'update_last5', orderId: orderId, transferLast5: newLast5 }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      successMsg.textContent = '已更新，感謝您的補件。';
+      successMsg.style.display = 'block';
+      document.getElementById('oLast5').textContent = newLast5;
+    } else {
+      errorMsg.textContent = data.error || '更新失敗，請再試一次。';
+      errorMsg.style.display = 'block';
+    }
+  } catch (err) {
+    errorMsg.textContent = '網路連線異常，請稍後再試。';
+    errorMsg.style.display = 'block';
+  }
+});
+
+load();
+</script>
+</body>
+</html>

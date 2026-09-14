@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>財務後台｜台大 EMBA 30週年紀念酒</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a0f1a; --card:#1a2438; --line:rgba(255,255,255,0.08);
+    --gold:#d4af5a; --ink:#eef1f6; --ink-dim:#9aa7bd; --ink-faint:#6b789b;
+    --ok:#2f9c93; --warn:#b5504a; --pending:#c99a3f;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg-0);color:var(--ink);font-family:'Noto Sans TC','Sora',sans-serif;}
+  .wrap{max-width:1300px;margin:0 auto;padding:40px 24px 80px;}
+  h1{font-size:22px;margin:0 0 24px;}
+
+  /* login */
+  .login-box{max-width:360px;margin:80px auto;border:1px solid var(--line);background:var(--card);
+    border-radius:6px;padding:30px;text-align:center;}
+  .login-box input{width:100%;padding:11px 13px;border-radius:4px;border:1px solid var(--line);
+    background:#101827;color:var(--ink);font-size:14.5px;margin-bottom:14px;}
+  .login-box button{width:100%;background:var(--gold);color:var(--bg-0);border:none;
+    font-weight:700;font-size:14.5px;padding:12px;border-radius:4px;cursor:pointer;}
+  .login-error{color:#e2a8a4;font-size:13px;margin-top:10px;display:none;}
+
+  /* dashboard */
+  #dashboard{display:none;}
+  .toolbar{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+  .toolbar input{padding:9px 12px;border-radius:4px;border:1px solid var(--line);
+    background:#101827;color:var(--ink);font-size:13.5px;min-width:200px;}
+  .toolbar .stat{font-size:13px;color:var(--ink-dim);}
+  .toolbar button.refresh{background:transparent;border:1px solid var(--line);color:var(--ink-dim);
+    padding:9px 14px;border-radius:4px;cursor:pointer;font-size:13px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);
+    border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  th, td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
+  th{color:var(--ink-faint);font-weight:600;font-size:12px;background:#161f34;}
+  tr:last-child td{border-bottom:none;}
+  .table-scroll{overflow-x:auto;border-radius:6px;}
+
+  select.status-select{
+    background:#101827;color:var(--ink);border:1px solid var(--line);border-radius:4px;
+    padding:6px 8px;font-size:12.5px;font-family:inherit;
+  }
+  select.status-select.paid{color:#8fd4cc;}
+  select.status-select.pending{color:#e8c67e;}
+  select.status-select.cancelled{color:#e2a8a4;}
+
+  .email-cell{display:flex;align-items:center;gap:8px;}
+  .email-cell .fail{color:#e2a8a4;}
+  .email-cell .ok{color:#8fd4cc;}
+  .resend-btn{
+    background:transparent;border:1px solid var(--warn);color:#e2a8a4;
+    font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;white-space:nowrap;
+  }
+  .resend-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .amount-cell{font-family:'Sora',sans-serif;font-weight:600;color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="login-box" id="loginBox">
+    <h1 style="margin-bottom:6px;">財務後台</h1>
+    <p style="color:var(--ink-faint);font-size:13px;margin-bottom:20px;">請輸入管理密碼</p>
+    <input type="password" id="passwordInput" placeholder="密碼">
+    <button id="loginBtn">登入</button>
+    <div class="login-error" id="loginError">密碼錯誤，請再試一次。</div>
+  </div>
+
+  <div id="dashboard">
+    <h1>認購訂單管理</h1>
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="搜尋姓名 / 班級 / 信箱">
+      <span class="stat" id="countStat"></span>
+      <button class="refresh" id="refreshBtn">重新整理</button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>時間</th><th>姓名</th><th>班級</th>
+            <th>心意</th><th>經典</th><th>尊榮</th><th>主酒支數</th><th>應付金額</th>
+            <th>末五碼</th><th>電話</th><th>信箱</th><th>宅配地址</th>
+            <th>確認信狀態</th><th>狀態通知信</th><th>狀態</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdgdRUvqsHWUcP6rF70dPN3Vs2Na65ak8yjcTrzhmDB2lWEqWH2s6S-MaJrWO5jwpj0g/exec';
+let password = '';
+let allOrders = [];
+
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+async function login() {
+  const input = document.getElementById('passwordInput').value;
+  const res = await fetch(SCRIPT_URL + '?action=admin_list&password=' + encodeURIComponent(input));
+  const data = await res.json();
+  if (!data.ok) {
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+  password = input;
+  sessionStorage.setItem('adminPassword', password);
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  allOrders = data.orders;
+  renderTable(filterOrders());
+}
+
+async function reload() {
+  const res = await fetch(SCRIPT_URL + '?action=admin_list&password=' + encodeURIComponent(password));
+  const data = await res.json();
+  if (data.ok) { allOrders = data.orders; renderTable(filterOrders()); }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', reload);
+document.getElementById('searchInput').addEventListener('input', () => renderTable(filterOrders()));
+
+function filterOrders() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) return allOrders;
+  return allOrders.filter(o =>
+    (o.name || '').toLowerCase().includes(q) ||
+    (o.className || '').toLowerCase().includes(q) ||
+    (o.email || '').toLowerCase().includes(q)
+  );
+}
+
+function statusClass(s) {
+  if (s === '已付款') return 'paid';
+  if (s === '逾期付款被取消') return 'cancelled';
+  return 'pending';
+}
+
+function formatCurrency(n) {
+  return 'NT$' + (Number(n) || 0).toLocaleString('en-US');
+}
+
+function renderTable(orders) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('countStat').textContent = `共 ${orders.length} 筆`;
+
+  orders.forEach(o => {
+    const tr = document.createElement('tr');
+    const time = o.time ? new Date(o.time).toLocaleString('zh-TW', { dateStyle: 'short', timeStyle: 'short' }) : '';
+    tr.innerHTML = `
+      <td>${time}</td>
+      <td>${escapeHtml(o.name)}</td>
+      <td>${escapeHtml(o.className)}</td>
+      <td>${o.qtyBasic}</td>
+      <td>${o.qtyClassic}</td>
+      <td>${o.qtyPremium}</td>
+      <td>${o.mainWineNeeded}</td>
+      <td class="amount-cell">${formatCurrency(o.totalAmount)}</td>
+      <td>${escapeHtml(o.transferLast5)}</td>
+      <td>${escapeHtml(o.phone)}</td>
+      <td>${escapeHtml(o.email)}</td>
+      <td>${escapeHtml(o.deliveryAddress)}</td>
+      <td></td>
+      <td>${escapeHtml(o.statusEmailStatus)}</td>
+      <td></td>
+    `;
+
+    // 確認信狀態欄：失敗時附上補寄按鈕
+    const confirmEmailTd = tr.children[12];
+    const isFail = (o.confirmEmailStatus || '').indexOf('失敗') !== -1;
+    const emailCellDiv = document.createElement('div');
+    emailCellDiv.className = 'email-cell';
+    const emailText = document.createElement('span');
+    emailText.textContent = o.confirmEmailStatus || '（尚未寄送）';
+    emailText.className = isFail ? 'fail' : 'ok';
+    emailCellDiv.appendChild(emailText);
+    if (isFail) {
+      const resendBtn = document.createElement('button');
+      resendBtn.className = 'resend-btn';
+      resendBtn.textContent = '補寄';
+      resendBtn.addEventListener('click', () => resendEmail(o.orderId, resendBtn, emailText));
+      emailCellDiv.appendChild(resendBtn);
+    }
+    confirmEmailTd.appendChild(emailCellDiv);
+
+    // 狀態欄：下拉選單 + 送出前彈出確認視窗
+    const statusTd = tr.children[14];
+    const select = document.createElement('select');
+    select.className = 'status-select ' + statusClass(o.status);
+    let previousValue = o.status;
+    ['付款待確認', '已付款', '逾期付款被取消'].forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      if (s === o.status) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', () => {
+      const newStatus = select.value;
+      if (newStatus === previousValue) return;
+      const confirmed = confirm(
+        '確定要更改以下訂單的狀態嗎？\n\n' +
+        '姓名：' + o.name + '（' + o.className + '）\n' +
+        '應付金額：' + formatCurrency(o.totalAmount) + '\n' +
+        '狀態變更：「' + previousValue + '」→「' + newStatus + '」\n\n' +
+        '確定後系統會立即寄送狀態通知信給訂購人。'
+      );
+      if (!confirmed) {
+        select.value = previousValue;
+        return;
+      }
+      updateStatus(o, newStatus, select, (success) => {
+        if (success) {
+          previousValue = newStatus;
+          o.status = newStatus;
+        } else {
+          select.value = previousValue;
+        }
+      });
+    });
+    statusTd.appendChild(select);
+
+    tbody.appendChild(tr);
+  });
+}
+
+async function updateStatus(o, newStatus, selectEl, done) {
+  selectEl.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_update_status', password, orderId: o.orderId, status: newStatus }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      selectEl.className = 'status-select ' + statusClass(newStatus);
+      done(true);
+    } else {
+      alert(data.error || '更新失敗');
+      done(false);
+    }
+  } catch (err) {
+    alert('網路連線異常，請稍後再試');
+    done(false);
+  } finally {
+    selectEl.disabled = false;
+  }
+}
+
+async function resendEmail(orderId, btnEl, textEl) {
+  btnEl.disabled = true;
+  btnEl.textContent = '寄送中…';
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_resend_email', password, orderId }),
+    });
+    const data = await res.json();
+    if (data.ok && data.emailSent) {
+      textEl.textContent = '已寄送';
+      textEl.className = 'ok';
+      btnEl.remove();
+    } else {
+      textEl.textContent = data.status || '仍然失敗';
+      btnEl.disabled = false;
+      btnEl.textContent = '再試一次';
+    }
+  } catch (err) {
+    btnEl.disabled = false;
+    btnEl.textContent = '再試一次';
+    alert('網路連線異常，請稍後再試');
+  }
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const savedPassword = sessionStorage.getItem('adminPassword');
+if (savedPassword) {
+  document.getElementById('passwordInput').value = savedPassword;
+  login();
+}
+</script>
+</body>
+</html>
