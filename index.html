@@ -215,6 +215,8 @@
   .month-block.p2 .month-events li{border-left:2.5px solid var(--p2);}
   .month-block.p3 .month-events li{border-left:2.5px solid var(--p3);}
   .month-events li .ev-date{color:var(--ink);font-weight:600;margin-right:6px;}
+  .month-events li .ev-link{color:var(--gold);text-decoration:underline;text-decoration-color:rgba(212,175,90,0.35);}
+  .month-events li .ev-link:hover{text-decoration-color:var(--gold);}
   .badge-tbd{
     display:inline-block;margin-left:8px;font-size:11px;padding:1px 7px;
     border-radius:999px;border:1px solid var(--ink-faint);color:var(--ink-faint);
@@ -223,6 +225,15 @@
     display:inline-block;margin-left:8px;font-size:11px;padding:1px 7px;
     border-radius:999px;background:var(--p1-soft);color:var(--p1);font-weight:700;
   }
+  .badge-closed{
+    display:inline-block;margin-left:8px;font-size:11px;padding:1px 7px;
+    border-radius:999px;background:rgba(181,80,74,0.14);color:#c98d89;font-weight:700;
+  }
+  .badge-done{
+    display:inline-block;margin-left:8px;font-size:11px;padding:1px 7px;
+    border-radius:999px;background:rgba(255,255,255,0.05);color:var(--ink-faint);
+  }
+  .month-events li.is-past{opacity:0.5;}
 
   /* ---------- Footer ---------- */
   footer{border-top:1px solid var(--line);padding:36px 0;}
@@ -243,57 +254,8 @@
         <span class="zh">台大 EMBA 第23屆學生會</span>
       </div>
     </div>
-    <a class="nav-cta" href="#featured-event">最新活動</a>
   </div>
 </header>
-
-<section class="featured" id="featured-event">
-  <div class="wrap">
-    <div class="featured-label"><span class="pulse"></span>報名進行中・9月14日截止</div>
-
-    <div class="fcard">
-      <div class="fcard-visual">
-        <div class="date-block">
-          <div class="month">SEP 2026</div>
-          <div class="day">28</div>
-          <div class="weekday">星期一・12:00–16:00</div>
-        </div>
-      </div>
-      <div class="fcard-body">
-        <h2>格子亮了，一起動起來！親子活動</h2>
-        <div class="venue">閃動格子 CyberCube 南港旗艦概念館</div>
-
-        <div class="meta-grid">
-          <div class="meta-item">
-            <div class="k">費用</div>
-            <div class="v accent">每人 NT$200</div>
-          </div>
-          <div class="meta-item">
-            <div class="k">名額</div>
-            <div class="v">限額 100 人</div>
-          </div>
-          <div class="meta-item">
-            <div class="k">報名截止</div>
-            <div class="v">9 月 14 日</div>
-          </div>
-          <div class="meta-item">
-            <div class="k">主辦</div>
-            <div class="v">23屆活動組</div>
-          </div>
-        </div>
-
-        <p class="desc">
-          這是23屆活動組今年第一場活動，由學生會補助大部分費用，NT$200 即包含閃動格子入場、活動、保險及餐飲。當天也會安排教師節感謝儀式，邀請管院師長與23屆同學、家人一起參與，歡迎攜家帶眷同樂。
-        </p>
-
-        <div class="cta-row">
-          <a class="btn-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf249qDACfsay4axy3sm01NCZWyk42eqRo3KYaLbFX__Pk0ig/viewform" target="_blank" rel="noopener">立即報名</a>
-          <span class="btn-note">名額有限，額滿為止</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <section class="timeline-section">
   <div class="wrap">
@@ -320,10 +282,10 @@ const MONTHS = [
   { tag:"9月", year:"2026", title:"情誼破冰與新生凝聚", phase:"p1", events:[
     { date:"9/12", text:"校友基金會聯名講座：矽島躍升" },
     { date:"9/15", text:"校友基金會聯名講座：AI聯盟" },
-    { date:"9/28", text:"閃動大作戰！親子光影闖關賽", live:true },
+    { date:"9/28", text:"閃動大作戰！親子光影闖關賽", status:"closed" },
   ]},
   { tag:"10月", year:"2026", title:"公益共融、產業鏈結與會長盃榮譽爭霸", phase:"p1", events:[
-    { date:"10/3", text:"視障星光大道" },
+    { date:"10/3", text:"第17屆瀚邦盃 視障星光大道歌唱暨樂器比賽決賽", link:"https://forms.gle/bxMez66NVApkQaRw6", live:true },
     { date:"10/17–18", text:"校友企業博覽會" },
     { date:"10/24", text:"會長盃籃球賽" },
   ]},
@@ -331,7 +293,7 @@ const MONTHS = [
     { date:"11月", text:"百川講堂", tbd:true },
   ]},
   { tag:"12月", year:"2026", title:"年度高峰與璀璨慶典", phase:"p2", events:[
-    { date:"12月", text:"品牌盛事：聖誕聯合 Party", tbd:true },
+    { date:"12/9", text:"品牌盛事：聖誕聯合 Party" },
   ]},
   { tag:"1月", year:"2027", title:"極限應戰與高峰傳承", phase:"p2", events:[
     { date:"1月", text:"百川講堂", tbd:true },
@@ -357,16 +319,32 @@ const MONTHS = [
   ]},
 ];
 
+function isPastEvent(m, e) {
+  const match = e.date.match(/^(\d{1,2})\/(\d{1,2})/);
+  if (!match) return false; // 沒有明確日、月的（例如「11月」「4–10月」）不自動判斷
+  const month = parseInt(match[1], 10);
+  const day = parseInt(match[2], 10);
+  const eventEnd = new Date(parseInt(m.year, 10), month - 1, day, 23, 59, 59);
+  return new Date() > eventEnd;
+}
+
+function badgeHtml(m, e) {
+  if (e.status === 'closed') return '<span class="badge-closed">報名截止</span>';
+  if (e.live) return '<span class="badge-live">開放報名</span>';
+  if (e.tbd) return '<span class="badge-tbd">待定</span>';
+  if (isPastEvent(m, e)) return '<span class="badge-done">已結束</span>';
+  return '';
+}
+
 const tl = document.getElementById('timeline');
 MONTHS.forEach(m => {
   const block = document.createElement('div');
   block.className = `month-block ${m.phase}`;
 
   const eventsHtml = m.events.map(e => `
-    <li>
-      <span class="ev-date">${e.date}</span>${e.text}
-      ${e.live ? '<span class="badge-live">開放報名</span>' : ''}
-      ${e.tbd ? '<span class="badge-tbd">待定</span>' : ''}
+    <li class="${isPastEvent(m, e) ? 'is-past' : ''}">
+      <span class="ev-date">${e.date}</span>${e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="ev-link">${e.text}</a>` : e.text}
+      ${badgeHtml(m, e)}
     </li>
   `).join('');
 
