@@ -36,11 +36,6 @@
   }
   .wrap{max-width:720px;margin:0 auto;padding:56px 24px 80px;}
 
-  .badge-test{
-    display:inline-block;font-size:12px;font-weight:700;color:var(--warn);
-    border:1px solid rgba(181,80,74,0.5);background:rgba(181,80,74,0.1);
-    padding:4px 10px;border-radius:999px;margin-bottom:20px;
-  }
 
   .eyebrow{color:var(--gold);font-size:13px;font-weight:600;letter-spacing:0.05em;margin-bottom:10px;}
   h1{font-size:clamp(24px,4vw,32px);margin:0 0 10px;font-weight:800;}
@@ -167,7 +162,6 @@
 <body>
 <div class="wrap">
 
-  <span class="badge-test">內部測試頁・尚未正式對外公告</span>
   <div class="eyebrow">NTU EMBA 30TH ANNIVERSARY</div>
   <h1>台大 EMBA 30週年紀念酒 認購登記</h1>
   <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，主酒限量 500 支，額滿即停止開放。</p>
@@ -184,10 +178,10 @@
   </div>
 
   <div class="locked-panel" id="lockedPanel">
-    <div class="eyebrow">尚未開放</div>
-    <h2>認購登記尚未開始</h2>
+    <div class="eyebrow" id="lockedEyebrow">尚未開放</div>
+    <h2 id="lockedTitle">認購登記尚未開始</h2>
     <div class="locked-time" id="lockedTimeText">載入中…</div>
-    <p>時間一到頁面會自動開放，屆時重新整理即可看到表單。</p>
+    <p id="lockedDesc">時間一到頁面會自動開放，屆時重新整理即可看到表單。</p>
   </div>
 
   <div id="mainContent">
@@ -308,7 +302,7 @@
 
 <script>
 // ⚠️ 部署 Apps Script 後，把下面這行換成你的網頁應用程式網址（.../exec 結尾）
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdgdRUvqsHWUcP6rF70dPN3Vs2Na65ak8yjcTrzhmDB2lWEqWH2s6S-MaJrWO5jwpj0g/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfpR2hC80fc0XI-EL0oGf3dndyXF3Sv9-K8cp0n6Pzi5aSFojfUHKe8orcOLb87XUtCg/exec';
 
 const els = {
   lockedPanel: document.getElementById('lockedPanel'),
@@ -337,9 +331,19 @@ function renderStats(stats) {
   if (stats.isOpen === false) {
     els.lockedPanel.style.display = 'block';
     els.mainContent.style.display = 'none';
-    if (stats.launchAt) {
-      const d = new Date(stats.launchAt);
-      els.lockedTimeText.textContent = d.toLocaleString('zh-TW', { dateStyle: 'long', timeStyle: 'short' }) + ' 開放';
+    if (stats.mode === 'closed') {
+      document.getElementById('lockedEyebrow').textContent = '暫停開放';
+      document.getElementById('lockedTitle').textContent = '認購登記目前暫停';
+      els.lockedTimeText.textContent = '';
+      document.getElementById('lockedDesc').textContent = '如有疑問請聯繫學生會，重新開放時會另行公告。';
+    } else {
+      document.getElementById('lockedEyebrow').textContent = '尚未開放';
+      document.getElementById('lockedTitle').textContent = '認購登記尚未開始';
+      document.getElementById('lockedDesc').textContent = '時間一到頁面會自動開放，屆時重新整理即可看到表單。';
+      if (stats.launchAt) {
+        const d = new Date(stats.launchAt);
+        els.lockedTimeText.textContent = d.toLocaleString('zh-TW', { dateStyle: 'long', timeStyle: 'short' }) + ' 開放';
+      }
     }
     return;
   }

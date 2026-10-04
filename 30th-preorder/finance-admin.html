@@ -62,6 +62,29 @@
   .resend-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
   .amount-cell{font-family:'Sora',sans-serif;font-weight:600;color:var(--gold);}
+
+  .mode-panel{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+    border:1px solid var(--line);background:var(--card);border-radius:6px;
+    padding:16px 20px;margin-bottom:20px;
+  }
+  .mode-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13.5px;}
+  .mode-info .k{color:var(--ink-faint);}
+  .mode-badge{padding:4px 12px;border-radius:999px;font-weight:700;font-size:13px;}
+  .mode-badge.open{background:rgba(47,156,147,0.16);color:#8fd4cc;}
+  .mode-badge.closed{background:rgba(181,80,74,0.16);color:#e2a8a4;}
+  .mode-badge.waiting{background:rgba(201,154,63,0.16);color:#e8c67e;}
+  .mode-desc{color:var(--ink-dim);font-size:12.5px;}
+  .mode-actions{display:flex;gap:10px;align-items:center;}
+  .mode-actions select{
+    background:#101827;color:var(--ink);border:1px solid var(--line);border-radius:4px;
+    padding:8px 10px;font-size:13px;font-family:inherit;
+  }
+  .mode-actions button{
+    background:var(--gold);color:var(--bg-0);border:none;font-weight:700;font-size:13px;
+    padding:9px 16px;border-radius:4px;cursor:pointer;
+  }
+  .mode-actions button:disabled{opacity:0.5;cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -77,6 +100,23 @@
 
   <div id="dashboard">
     <h1>認購訂單管理</h1>
+
+    <div class="mode-panel">
+      <div class="mode-info">
+        <span class="k">預購頁狀態</span>
+        <span class="mode-badge" id="modeBadge">載入中…</span>
+        <span class="mode-desc" id="modeDesc"></span>
+      </div>
+      <div class="mode-actions">
+        <select id="modeSelect">
+          <option value="auto">依排程自動</option>
+          <option value="open">強制開放</option>
+          <option value="closed">強制關閉</option>
+        </select>
+        <button id="modeApplyBtn">套用</button>
+      </div>
+    </div>
+
     <div class="toolbar">
       <input type="text" id="searchInput" placeholder="搜尋姓名 / 班級 / 信箱">
       <span class="stat" id="countStat"></span>
@@ -99,9 +139,10 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdgdRUvqsHWUcP6rF70dPN3Vs2Na65ak8yjcTrzhmDB2lWEqWH2s6S-MaJrWO5jwpj0g/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfpR2hC80fc0XI-EL0oGf3dndyXF3Sv9-K8cp0n6Pzi5aSFojfUHKe8orcOLb87XUtCg/exec';
 let password = '';
 let allOrders = [];
+let currentSettings = null;
 
 document.getElementById('loginBtn').addEventListener('click', login);
 document.getElementById('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
@@ -119,13 +160,18 @@ async function login() {
   document.getElementById('loginBox').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   allOrders = data.orders;
+  if (data.settings) renderSettings(data.settings);
   renderTable(filterOrders());
 }
 
 async function reload() {
   const res = await fetch(SCRIPT_URL + '?action=admin_list&password=' + encodeURIComponent(password));
   const data = await res.json();
-  if (data.ok) { allOrders = data.orders; renderTable(filterOrders()); }
+  if (data.ok) {
+    allOrders = data.orders;
+    if (data.settings) renderSettings(data.settings);
+    renderTable(filterOrders());
+  }
 }
 
 document.getElementById('refreshBtn').addEventListener('click', reload);
@@ -140,6 +186,70 @@ function filterOrders() {
     (o.email || '').toLowerCase().includes(q)
   );
 }
+
+function formatLaunch(iso) {
+  return new Date(iso).toLocaleString('zh-TW', { dateStyle: 'long', timeStyle: 'short' });
+}
+
+function renderSettings(s) {
+  const badge = document.getElementById('modeBadge');
+  const desc = document.getElementById('modeDesc');
+  const modeText = { auto: '依排程自動', open: '強制開放', closed: '強制關閉' }[s.mode];
+
+  if (s.isOpen) {
+    badge.textContent = '開放中';
+    badge.className = 'mode-badge open';
+  } else if (s.mode === 'closed') {
+    badge.textContent = '已關閉';
+    badge.className = 'mode-badge closed';
+  } else {
+    badge.textContent = '尚未開放';
+    badge.className = 'mode-badge waiting';
+  }
+  desc.textContent = '目前模式：' + modeText + '｜排程開放時間：' + formatLaunch(s.launchAt);
+  document.getElementById('modeSelect').value = s.mode;
+  currentSettings = s;
+}
+
+document.getElementById('modeApplyBtn').addEventListener('click', async () => {
+  const select = document.getElementById('modeSelect');
+  const btn = document.getElementById('modeApplyBtn');
+  const newMode = select.value;
+  if (currentSettings && newMode === currentSettings.mode) return;
+
+  const launch = currentSettings ? formatLaunch(currentSettings.launchAt) : '';
+  const explain = {
+    auto: '改為「依排程自動」：到 ' + launch + ' 才會開放，在那之前民眾看到的是「尚未開放」。',
+    open: '改為「強制開放」：預購頁會立刻開放，不受排程時間限制。',
+    closed: '改為「強制關閉」：預購頁會立刻停止接受新訂單，已送出的訂單不受影響。',
+  }[newMode];
+
+  if (!confirm('確定要切換預購頁的開關嗎？\n\n' + explain)) {
+    if (currentSettings) select.value = currentSettings.mode;
+    return;
+  }
+
+  btn.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_set_mode', password, mode: newMode }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      renderSettings(data.settings);
+    } else {
+      alert(data.error || '切換失敗');
+      if (currentSettings) select.value = currentSettings.mode;
+    }
+  } catch (err) {
+    alert('網路連線異常，請稍後再試');
+    if (currentSettings) select.value = currentSettings.mode;
+  } finally {
+    btn.disabled = false;
+  }
+});
 
 function statusClass(s) {
   if (s === '已付款') return 'paid';
