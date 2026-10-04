@@ -282,11 +282,11 @@ const MONTHS = [
   { tag:"9月", year:"2026", title:"情誼破冰與新生凝聚", phase:"p1", events:[
     { date:"9/12", text:"校友基金會聯名講座：矽島躍升" },
     { date:"9/15", text:"校友基金會聯名講座：AI聯盟" },
-    { date:"9/28", text:"閃動大作戰！親子光影闖關賽", link:"https://docs.google.com/forms/d/e/1FAIpQLSf249qDACfsay4axy3sm01NCZWyk42eqRo3KYaLbFX__Pk0ig/viewform", live:true },
+    { date:"9/28", text:"閃動大作戰！親子光影闖關賽" },
   ]},
   { tag:"10月", year:"2026", title:"公益共融、產業鏈結與會長盃榮譽爭霸", phase:"p1", events:[
-    { date:"10/3", text:"第17屆瀚邦盃 視障星光大道歌唱暨樂器比賽決賽", link:"https://forms.gle/bxMez66NVApkQaRw6", live:true },
-    { date:"10/17–18", text:"校友企業博覽會" },
+    { date:"10/3", text:"第17屆瀚邦盃 視障星光大道歌唱暨樂器比賽決賽" },
+    { date:"10/17–18", text:"校友企業博覽會", link:"https://www.facebook.com/share/p/19UbQPvin7/" },
     { date:"10/24", text:"會長盃籃球賽" },
   ]},
   { tag:"11月", year:"2026", title:"思維躍遷與大師殿堂", phase:"p2", events:[
@@ -320,19 +320,19 @@ const MONTHS = [
 ];
 
 function isPastEvent(m, e) {
-  const match = e.date.match(/^(\d{1,2})\/(\d{1,2})/);
+  const match = e.date.match(/^(\d{1,2})\/(\d{1,2})(?:[–-](\d{1,2}))?/);
   if (!match) return false; // 沒有明確日、月的（例如「11月」「4–10月」）不自動判斷
   const month = parseInt(match[1], 10);
-  const day = parseInt(match[2], 10);
+  const day = parseInt(match[3] || match[2], 10); // 區間日期以結束日為準
   const eventEnd = new Date(parseInt(m.year, 10), month - 1, day, 23, 59, 59);
   return new Date() > eventEnd;
 }
 
 function badgeHtml(m, e) {
+  if (isPastEvent(m, e)) return '<span class="badge-done">已結束</span>';
   if (e.status === 'closed') return '<span class="badge-closed">報名截止</span>';
   if (e.live) return '<span class="badge-live">開放報名</span>';
   if (e.tbd) return '<span class="badge-tbd">待定</span>';
-  if (isPastEvent(m, e)) return '<span class="badge-done">已結束</span>';
   return '';
 }
 
