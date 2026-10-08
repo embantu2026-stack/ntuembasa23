@@ -74,8 +74,8 @@
   }
   .product-gallery figure{margin:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--card);display:flex;flex-direction:column;}
   .product-gallery img{width:100%;height:auto;display:block;cursor:zoom-in;}
-  /* 直式、白底的商品照：限制高度並置中，白底自然鋪滿整排 */
-  .product-gallery img.tall{max-height:560px;object-fit:contain;background:#fff;}
+  /* 直式照片：限制高度並置中，兩側留白沿用卡片底色 */
+  .product-gallery img.tall{max-height:560px;object-fit:contain;}
   .lightbox{
     position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
     background:rgba(5,8,14,0.92);padding:24px;cursor:zoom-out;
