@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台大 EMBA 30週年紀念酒 認購登記</title>
 <meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -72,6 +74,8 @@
   }
   .product-gallery figure{margin:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--card);display:flex;flex-direction:column;}
   .product-gallery img{width:100%;height:auto;display:block;cursor:zoom-in;}
+  /* 直式、白底的商品照：限制高度並置中，白底自然鋪滿整排 */
+  .product-gallery img.tall{max-height:560px;object-fit:contain;background:#fff;}
   .lightbox{
     position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
     background:rgba(5,8,14,0.92);padding:24px;cursor:zoom-out;
@@ -229,8 +233,8 @@
       <figcaption>台大 EMBA 30 週年紀念酒｜30 年蘇格蘭調和威士忌</figcaption>
     </figure>
     <figure>
-      <img src="images/ntu-emba-30th-godfather-wine.jpg" alt="義父IF 尊爵典藏 時光領袖">
-      <figcaption>義父 IF｜尊爵典藏・時光領袖(只送不賣，送完為止）</figcaption>
+      <img class="tall" src="images/ntu-emba-30th-godfather-wine.jpg" alt="義父IF 尊爵典藏 時光領袖">
+      <figcaption>義父 IF｜尊爵典藏・時光領袖</figcaption>
     </figure>
   </div>
 
@@ -486,7 +490,7 @@ function newRequestId() {
 }
 
 // 連線失敗時自動重試（Apps Script 偶爾會回傳 404 或非 JSON 的錯誤頁）
-async function postWithRetry(payload, tries = 3) {
+async function postWithRetry(payload, tries = 4) {
   let lastErr;
   for (let i = 0; i < tries; i++) {
     try {
@@ -495,7 +499,13 @@ async function postWithRetry(payload, tries = 3) {
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
       });
-      return await res.json();
+      const data = await res.json();
+      if (data && data.busy && i < tries - 1) {   // 後端回報忙碌（同時送單的人多）→ 稍等再試
+        els.loadingNote.textContent = '目前送單人數較多，正在重新嘗試…';
+        await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+        continue;
+      }
+      return data;
     } catch (err) {
       lastErr = err;
       if (i < tries - 1) {
