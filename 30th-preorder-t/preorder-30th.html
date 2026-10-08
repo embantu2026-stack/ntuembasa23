@@ -41,6 +41,31 @@
   h1{font-size:clamp(24px,4vw,32px);margin:0 0 10px;font-weight:800;}
   .sub{color:var(--ink-dim);font-size:14.5px;margin:0 0 36px;max-width:56ch;}
 
+  /* ---- Story ---- */
+  .story{
+    border-left:3px solid var(--gold);background:linear-gradient(155deg,var(--card-hi),var(--card) 70%);
+    border-radius:0 6px 6px 0;padding:26px 28px;margin-bottom:28px;
+  }
+  .story h2{font-size:clamp(17px,3vw,20px);margin:0 0 16px;color:var(--gold);line-height:1.5;}
+  .story p{margin:0 0 12px;font-size:14.5px;color:var(--ink-dim);line-height:1.85;}
+  .story p strong{color:var(--ink);}
+  .story .quote{
+    margin:16px 0;padding:12px 16px;border-left:2px solid var(--gold-soft);
+    color:var(--ink);font-size:15px;
+  }
+  .story .highlight{margin:16px 0 0;color:var(--ink);font-weight:600;}
+
+  /* ---- Contact ---- */
+  .contact-box{
+    margin-top:36px;padding:24px 26px;border:1px solid var(--line);border-radius:6px;
+    background:var(--card);text-align:center;
+  }
+  .contact-box p{margin:0 0 14px;font-size:14px;color:var(--ink-dim);}
+  .contact-box a{
+    display:inline-block;background:var(--gold);color:var(--bg-0);font-weight:700;
+    font-size:14.5px;padding:11px 22px;border-radius:4px;text-decoration:none;
+  }
+
   /* ---- Product gallery ---- */
   .product-gallery{
     display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:36px;
@@ -190,6 +215,14 @@
   <h1>台大 EMBA 30週年紀念酒 認購登記</h1>
   <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，30年紀念酒開放認購 495 瓶，額滿即停止開放。</p>
 
+  <div class="story">
+    <h2>臺大 EMBA 三十週年｜珍藏情誼，期待再相聚</h2>
+    <p>迎接臺大 EMBA 三十週年，第23屆學生會準備了一份值得珍藏的紀念—蘇格蘭30年調和威士忌。</p>
+    <p>由會長慷慨捐贈，學長姐們認購所得將全數納入學生會經費，用於推動活動、增進同學福利，讓這份心意，成就更多相聚的時刻。💛</p>
+    <p class="quote">願多年後再相聚，看見這瓶酒，還能笑著說：「那時候，我們一起留下了好多美好的回憶。」</p>
+    <p class="highlight">✨ 限量500瓶，邀請第23屆同學與歷屆學長姐一同珍藏。</p>
+  </div>
+
   <div class="product-gallery">
     <figure>
       <img src="images/ntu-emba-30th-classic-wine.jpg" alt="台大 EMBA 30週年紀念酒 雪莉桶威士忌調和酒">
@@ -197,7 +230,7 @@
     </figure>
     <figure>
       <img src="images/ntu-emba-30th-godfather-wine.jpg" alt="義父IF 尊爵典藏 時光領袖">
-      <figcaption>義父 IF｜尊爵典藏・時光領袖 (只送不賣，送完為止）</figcaption>
+      <figcaption>義父 IF｜尊爵典藏・時光領袖</figcaption>
     </figure>
   </div>
 
@@ -342,6 +375,12 @@
       <div class="msg success" id="successMsg"></div>
       <div class="msg error" id="errorMsg"></div>
     </div>
+
+  </div>
+
+  <div class="contact-box">
+    <p>如果大家有任何問題，歡迎加入「臺大EMBA23屆學生會大群」詢問討論。</p>
+    <a href="https://line.me/ti/g2/II6vCSLQ089NHK73SyS0ndJP3Fmc8_wIZ07QKQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">加入 LINE 社群</a>
   </div>
 </div>
 
