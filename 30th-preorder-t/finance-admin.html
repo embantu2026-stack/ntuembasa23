@@ -149,7 +149,7 @@
       <div class="reserve-title">保留酒款<span class="reserve-hint">先從總量扣除、不開放認購；會出現在下方表格，狀態為「保留」</span></div>
       <div class="reserve-form">
         <input type="text" id="reserveLabel" placeholder="用途說明，例如：感謝致贈（院長）">
-        <input type="number" id="reserveBottles" min="1" value="1" title="支數">
+        <input type="number" id="reserveBottles" min="1" value="1" title="瓶數">
         <button id="reserveAddBtn">新增保留</button>
       </div>
     </div>
@@ -164,7 +164,7 @@
         <thead>
           <tr>
             <th>時間</th><th>姓名</th><th>班級</th>
-            <th>心意</th><th>經典</th><th>尊榮</th><th>主酒支數</th><th>應付金額</th>
+            <th>心意</th><th>經典</th><th>尊榮</th><th>紀念酒瓶數</th><th>義父酒加贈</th><th>應付金額</th>
             <th>末五碼</th><th>電話</th><th>信箱</th><th>宅配地址</th>
             <th>確認信狀態</th><th>狀態通知信</th><th>狀態</th>
           </tr>
@@ -186,10 +186,23 @@ document.getElementById('passwordInput').addEventListener('keydown', (e) => { if
 
 async function login() {
   const input = document.getElementById('passwordInput').value;
-  const res = await fetch(SCRIPT_URL + '?action=admin_list&password=' + encodeURIComponent(input));
-  const data = await res.json();
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  let data;
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=admin_list&password=' + encodeURIComponent(input));
+    data = await res.json();
+  } catch (err) {
+    errEl.textContent = '無法連線到後端：請確認 SCRIPT_URL 是否正確，且 Apps Script 已部署為「所有人可存取」。';
+    errEl.style.display = 'block';
+    return;
+  }
+
   if (!data.ok) {
-    document.getElementById('loginError').style.display = 'block';
+    errEl.textContent = (data.error === '密碼錯誤') ? '密碼錯誤，請再試一次。' : (data.error || '登入失敗');
+    errEl.style.display = 'block';
+    sessionStorage.removeItem('adminPassword'); // 清掉舊的暫存密碼，避免一直自動帶入錯的
     return;
   }
   password = input;
@@ -231,8 +244,8 @@ document.getElementById('reserveAddBtn').addEventListener('click', async () => {
   const label = labelEl.value.trim();
   const bottles = parseInt(bottlesEl.value, 10) || 0;
 
-  if (!label || bottles <= 0) { alert('請填寫用途說明，且支數需大於 0'); return; }
-  if (!confirm('確定要保留主酒嗎？\n\n用途：' + label + '\n支數：' + bottles + ' 支\n\n這會立刻從開放認購的總量中扣除。')) return;
+  if (!label || bottles <= 0) { alert('請填寫用途說明，且瓶數需大於 0'); return; }
+  if (!confirm('確定要保留30年紀念酒嗎？\n\n用途：' + label + '\n瓶數：' + bottles + ' 瓶\n\n這會立刻從開放認購的總量中扣除。')) return;
 
   btn.disabled = true;
   try {
@@ -257,7 +270,7 @@ document.getElementById('reserveAddBtn').addEventListener('click', async () => {
 });
 
 async function removeReserved(o, btnEl) {
-  if (!confirm('確定要移除這筆保留嗎？\n\n' + o.name + '（' + o.mainWineNeeded + ' 支）\n\n移除後這些主酒會回到開放認購的總量。')) return;
+  if (!confirm('確定要移除這筆保留嗎？\n\n' + o.name + '（' + o.mainWineNeeded + ' 瓶）\n\n移除後這些30年紀念酒會回到開放認購的總量。')) return;
   btnEl.disabled = true;
   try {
     const res = await fetch(SCRIPT_URL, {
@@ -363,6 +376,7 @@ function renderTable(orders) {
       <td>${o.qtyClassic}</td>
       <td>${o.qtyPremium}</td>
       <td>${o.mainWineNeeded}</td>
+      <td>${(o.giftBottles === '' || o.giftBottles == null) ? '—' : o.giftBottles}</td>
       <td class="amount-cell">${formatCurrency(o.totalAmount)}</td>
       <td>${escapeHtml(o.transferLast5)}</td>
       <td>${escapeHtml(o.phone)}</td>
@@ -376,8 +390,8 @@ function renderTable(orders) {
     // 保留酒款：不是真實訂單，只顯示標籤與移除按鈕
     if (o.status === '保留') {
       tr.classList.add('reserved-row');
-      tr.children[12].textContent = '—';
       tr.children[13].textContent = '—';
+      tr.children[14].textContent = '—';
       const badge = document.createElement('span');
       badge.className = 'reserved-badge';
       badge.textContent = '保留';
@@ -385,14 +399,14 @@ function renderTable(orders) {
       rm.className = 'remove-btn';
       rm.textContent = '移除';
       rm.addEventListener('click', () => removeReserved(o, rm));
-      tr.children[14].appendChild(badge);
-      tr.children[14].appendChild(rm);
+      tr.children[15].appendChild(badge);
+      tr.children[15].appendChild(rm);
       tbody.appendChild(tr);
       return;
     }
 
     // 確認信狀態欄：失敗時附上補寄按鈕
-    const confirmEmailTd = tr.children[12];
+    const confirmEmailTd = tr.children[13];
     const isFail = (o.confirmEmailStatus || '').indexOf('失敗') !== -1;
     const emailCellDiv = document.createElement('div');
     emailCellDiv.className = 'email-cell';
@@ -410,7 +424,7 @@ function renderTable(orders) {
     confirmEmailTd.appendChild(emailCellDiv);
 
     // 狀態欄：下拉選單 + 送出前彈出確認視窗
-    const statusTd = tr.children[14];
+    const statusTd = tr.children[15];
     const select = document.createElement('select');
     select.className = 'status-select ' + statusClass(o.status);
     let previousValue = o.status;

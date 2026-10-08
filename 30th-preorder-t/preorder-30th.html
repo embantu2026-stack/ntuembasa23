@@ -139,12 +139,18 @@
   textarea{resize:vertical;min-height:64px;}
   input:focus, textarea:focus{outline:none;border-color:var(--gold-soft);}
 
-  .qty-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-  @media (max-width:560px){ .qty-grid{grid-template-columns:1fr;} }
-  .qty-card{border:1px solid var(--line);border-radius:4px;padding:14px;background:#101827;}
-  .qty-card .name{font-size:13.5px;font-weight:700;margin-bottom:2px;}
-  .qty-card .price{font-size:12px;color:var(--gold);margin-bottom:10px;}
-  .qty-card .desc{font-size:11.5px;color:var(--ink-faint);margin-bottom:10px;}
+  .qty-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+  .qty-card{
+    display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;
+    border:1px solid var(--line);border-radius:4px;padding:14px 16px;background:#101827;
+  }
+  .qty-card .name{font-size:14px;font-weight:700;margin-bottom:2px;}
+  .qty-card .price{font-size:13px;color:var(--gold);font-weight:600;margin-bottom:4px;}
+  .qty-card .desc{font-size:12.5px;color:var(--ink-dim);line-height:1.6;}
+  .qty-card .desc .perk{color:var(--gold);}
+  .qty-card .qty-input{display:flex;align-items:center;gap:6px;color:var(--ink-faint);font-size:13px;}
+  .qty-card .qty-input input{width:84px;}
+  .gift-hint{font-size:12.5px;color:var(--gold);margin:-8px 0 20px;line-height:1.6;}
 
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media (max-width:560px){ .two-col{grid-template-columns:1fr;} }
@@ -177,7 +183,7 @@
 
   <div class="eyebrow">NTU EMBA 30TH ANNIVERSARY</div>
   <h1>台大 EMBA 30週年紀念酒 認購登記</h1>
-  <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，主酒開放認購 495 支，額滿即停止開放。</p>
+  <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，30年紀念酒開放認購 495 瓶，額滿即停止開放。</p>
 
   <div class="product-gallery">
     <figure>
@@ -211,17 +217,13 @@
   <div id="mainContent">
     <div class="stock-panel">
       <div class="stock-row">
-        <span class="label">主酒剩餘</span>
+        <span class="label">30年紀念酒剩餘</span>
         <span class="value remaining" id="mainRemainingText">載入中…</span>
       </div>
       <div class="bar-track"><div class="bar-fill" id="mainBar" style="width:0%"></div></div>
 
-      <div class="stock-row">
-        <span class="label">義父酒（前50組尊榮訂單贈送）剩餘</span>
-        <span class="value" id="godfatherRemainingText">載入中…</span>
-      </div>
       <div class="stock-note">數字每次開啟頁面或送出表單後會更新，非即時同步所有使用者畫面。</div>
-      <div class="sold-out-flag" id="soldOutFlag">主酒已全數額滿，暫停接受新的認購登記。</div>
+      <div class="sold-out-flag" id="soldOutFlag">30年紀念酒已全數額滿，暫停接受新的認購登記。</div>
     </div>
 
     <div class="payment-panel">
@@ -253,29 +255,31 @@
         <label>認購方案數量</label>
         <div class="qty-grid">
           <div class="qty-card">
-            <div class="name">心意典藏組</div>
-            <div class="price">
-              $12,800／組<br>
-              30年紀念酒 x 1瓶
+            <div class="qty-info">
+              <div class="name">心意典藏組</div>
+              <div class="price">$12,800／組</div>
+              <div class="desc">30年紀念酒 x 1瓶</div>
             </div>
-            <input type="number" id="qtyBasic" min="0" value="0">
+            <div class="qty-input"><input type="number" id="qtyBasic" min="0" value="0"><span>組</span></div>
           </div>
           <div class="qty-card">
-            <div class="name">經典典藏組</div>
-            <div class="price">
-              $38,400／組<br>
-              30年紀念酒 x 4瓶
+            <div class="qty-info">
+              <div class="name">經典典藏組</div>
+              <div class="price">$38,400／組</div>
+              <div class="desc">買 3 送 1｜30年紀念酒 x 4瓶<br>平均 $9,600／瓶</div>
             </div>
-            <input type="number" id="qtyClassic" min="0" value="0">
+            <div class="qty-input"><input type="number" id="qtyClassic" min="0" value="0"><span>組</span></div>
           </div>
           <div class="qty-card">
-            <div class="name">尊榮典藏組</div>
-            <div class="price">
-              $76,800／組<br>
-              30年紀念酒 x 8瓶 <br>
-              &#x1F381;尊榮禮遇｜加贈「義父IF」限量典藏版 x 1瓶
+            <div class="qty-info">
+              <div class="name">尊榮典藏組</div>
+              <div class="price">$76,800／組</div>
+              <div class="desc">
+                買 6 送 2｜30年紀念酒 x 8瓶<br>平均 $9,600／瓶<br>
+                <span class="perk">&#x1F381;尊榮禮遇｜每組加贈「義父IF」限量典藏版 x 1瓶</span>
+              </div>
             </div>
-            <input type="number" id="qtyPremium" min="0" value="0">
+            <div class="qty-input"><input type="number" id="qtyPremium" min="0" value="0"><span>組</span></div>
           </div>
         </div>
       </div>
@@ -302,9 +306,10 @@
       </div>
 
       <div class="summary">
-        <span class="k">此次認購將動用主酒</span>
-        <span class="v" id="neededText">0 支</span>
+        <span class="k">此次認購 30年紀念酒</span>
+        <span class="v" id="neededText">0 瓶</span>
       </div>
+      <div class="gift-hint" id="giftHint" style="display:none;"></div>
 
       <button type="submit" class="btn-submit" id="submitBtn">確認資料，下一步</button>
       <div class="msg error" id="formErrorMsg"></div>
@@ -319,7 +324,8 @@
       <div class="confirm-row"><span class="k">心意典藏組</span><span class="v" id="cBasic"></span></div>
       <div class="confirm-row"><span class="k">經典典藏組</span><span class="v" id="cClassic"></span></div>
       <div class="confirm-row"><span class="k">尊榮典藏組</span><span class="v" id="cPremium"></span></div>
-      <div class="confirm-row"><span class="k">動用主酒</span><span class="v" id="cNeeded"></span></div>
+      <div class="confirm-row"><span class="k">30年紀念酒</span><span class="v" id="cNeeded"></span></div>
+      <div class="confirm-row"><span class="k">義父IF 加贈</span><span class="v" id="cGift"></span></div>
       <div class="confirm-row amount"><span class="k">應匯款金額</span><span class="v" id="cAmount"></span></div>
       <p class="note">請確認以上資訊無誤，尤其是應匯款金額，送出後請依此金額於 72 小時內完成轉帳。</p>
 
@@ -344,7 +350,6 @@ const els = {
   mainContent: document.getElementById('mainContent'),
   mainRemainingText: document.getElementById('mainRemainingText'),
   mainBar: document.getElementById('mainBar'),
-  godfatherRemainingText: document.getElementById('godfatherRemainingText'),
   soldOutFlag: document.getElementById('soldOutFlag'),
   qtyBasic: document.getElementById('qtyBasic'),
   qtyClassic: document.getElementById('qtyClassic'),
@@ -385,10 +390,9 @@ function renderStats(stats) {
   els.lockedPanel.style.display = 'none';
   els.mainContent.style.display = 'block';
 
-  els.mainRemainingText.textContent = `${stats.mainWineRemaining} / ${stats.mainWineTotal} 支`;
+  els.mainRemainingText.textContent = `${stats.mainWineRemaining} / ${stats.mainWineTotal} 瓶`;
   const pct = Math.max(0, Math.min(100, (stats.mainWineUsed / stats.mainWineTotal) * 100));
   els.mainBar.style.width = pct + '%';
-  els.godfatherRemainingText.textContent = `${stats.godfatherRemaining} / ${stats.godfatherTotal} 支`;
 
   if (stats.mainWineRemaining <= 0) {
     els.soldOutFlag.style.display = 'block';
@@ -404,8 +408,16 @@ function updateNeeded() {
   const n2 = parseInt(els.qtyClassic.value, 10) || 0;
   const n3 = parseInt(els.qtyPremium.value, 10) || 0;
   const needed = n1 * 1 + n2 * 4 + n3 * 8;
-  els.neededText.textContent = needed + ' 支';
+  els.neededText.textContent = needed + ' 瓶';
   els.neededText.classList.toggle('warn', currentStats && needed > currentStats.mainWineRemaining);
+
+  const hint = document.getElementById('giftHint');
+  if (n3 > 0) {
+    hint.textContent = '尊榮禮遇：加贈「義父IF」 ' + n3 + ' 瓶';
+    hint.style.display = 'block';
+  } else {
+    hint.style.display = 'none';
+  }
 }
 
 [els.qtyBasic, els.qtyClassic, els.qtyPremium].forEach(el => el.addEventListener('input', updateNeeded));
@@ -450,7 +462,7 @@ els.form.addEventListener('submit', (e) => {
   const needed = n1 * 1 + n2 * 4 + n3 * 8;
   if (currentStats && needed > currentStats.mainWineRemaining) {
     const el = document.getElementById('formErrorMsg');
-    el.textContent = '主酒剩餘數量不足，請減少認購數量';
+    el.textContent = '30年紀念酒剩餘數量不足，請減少認購數量';
     el.style.display = 'block';
     return;
   }
@@ -464,7 +476,8 @@ els.form.addEventListener('submit', (e) => {
   document.getElementById('cBasic').textContent = n1 + ' 組';
   document.getElementById('cClassic').textContent = n2 + ' 組';
   document.getElementById('cPremium').textContent = n3 + ' 組';
-  document.getElementById('cNeeded').textContent = needed + ' 支';
+  document.getElementById('cNeeded').textContent = needed + ' 瓶';
+  document.getElementById('cGift').textContent = n3 === 0 ? '—' : n3 + ' 瓶';
   document.getElementById('cAmount').textContent = formatCurrency(amount);
 
   els.form.style.display = 'none';
@@ -511,6 +524,7 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async () =
     if (data.ok) {
       const statusLink = 'order-status.html?id=' + encodeURIComponent(data.orderId);
       els.successMsg.innerHTML = '認購登記已送出，感謝您的支持！應匯款金額 <strong>' + formatCurrency(data.totalAmount) + '</strong>，請於 72 小時內完成轉帳。' +
+        (data.giftBottles > 0 ? '<br>尊榮禮遇：加贈「義父IF」 ' + data.giftBottles + ' 瓶。' : '') +
         '<br>我們已寄送確認信至您填寫的信箱' + (data.emailSent ? '' : '（但這次寄送似乎沒有成功，建議先收藏下方連結）') + '。' +
         '<br><a href="' + statusLink + '" style="color:#d4af5a;">點此查詢訂單狀態 / 補填轉帳末五碼</a>';
       els.successMsg.style.display = 'block';
