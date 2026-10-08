@@ -477,6 +477,35 @@ async function loadStats() {
 }
 
 const PRICES = { basic: 12800, classic: 38400, premium: 76800 };
+
+// 每次進入「確認頁」產生一個請求編號；重試或再按一次送出都用同一個，後端據此避免重複建立訂單
+let pendingRequestId = null;
+function newRequestId() {
+  return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : Date.now().toString(16) + '-' + Math.random().toString(16).slice(2);
+}
+
+// 連線失敗時自動重試（Apps Script 偶爾會回傳 404 或非 JSON 的錯誤頁）
+async function postWithRetry(payload, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+      });
+      return await res.json();
+    } catch (err) {
+      lastErr = err;
+      if (i < tries - 1) {
+        els.loadingNote.textContent = '網路不穩，正在重新連線…';
+        await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+      }
+    }
+  }
+  throw lastErr;
+}
 function formatCurrency(n) { return 'NT$' + Number(n).toLocaleString('en-US'); }
 
 els.form.addEventListener('submit', (e) => {
@@ -524,6 +553,7 @@ els.form.addEventListener('submit', (e) => {
   document.getElementById('cGift').textContent = n3 === 0 ? '—' : n3 + ' 瓶';
   document.getElementById('cAmount').textContent = formatCurrency(amount);
 
+  pendingRequestId = newRequestId();
   els.form.style.display = 'none';
   document.getElementById('confirmPanel').style.display = 'block';
   window.scrollTo({ top: document.getElementById('confirmPanel').offsetTop - 20, behavior: 'smooth' });
@@ -545,6 +575,7 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async () =
 
   const payload = {
     action: 'submit_order',
+    requestId: pendingRequestId,
     name: document.getElementById('name').value,
     className: document.getElementById('className').value,
     qtyBasic: els.qtyBasic.value,
@@ -557,12 +588,7 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async () =
   };
 
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
+    const data = await postWithRetry(payload);
     els.loadingNote.textContent = '';
 
     if (data.ok) {
