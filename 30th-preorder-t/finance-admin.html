@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>財務後台｜台大 EMBA 30週年紀念酒</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a0f1a; --card:#1a2438; --line:rgba(255,255,255,0.08);
+    --gold:#d4af5a; --ink:#eef1f6; --ink-dim:#9aa7bd; --ink-faint:#6b789b;
+    --ok:#2f9c93; --warn:#b5504a; --pending:#c99a3f;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg-0);color:var(--ink);font-family:'Noto Sans TC','Sora',sans-serif;}
+  .wrap{max-width:1300px;margin:0 auto;padding:40px 24px 80px;}
+  h1{font-size:22px;margin:0 0 24px;}
+
+  /* login */
+  .login-box{max-width:360px;margin:80px auto;border:1px solid var(--line);background:var(--card);
+    border-radius:6px;padding:30px;text-align:center;}
+  .login-box input{width:100%;padding:11px 13px;border-radius:4px;border:1px solid var(--line);
+    background:#101827;color:var(--ink);font-size:14.5px;margin-bottom:14px;}
+  .login-box button{width:100%;background:var(--gold);color:var(--bg-0);border:none;
+    font-weight:700;font-size:14.5px;padding:12px;border-radius:4px;cursor:pointer;}
+  .login-error{color:#e2a8a4;font-size:13px;margin-top:10px;display:none;}
+
+  /* dashboard */
+  #dashboard{display:none;}
+  .toolbar{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+  .toolbar input{padding:9px 12px;border-radius:4px;border:1px solid var(--line);
+    background:#101827;color:var(--ink);font-size:13.5px;min-width:200px;}
+  .toolbar .stat{font-size:13px;color:var(--ink-dim);}
+  .toolbar button.refresh{background:transparent;border:1px solid var(--line);color:var(--ink-dim);
+    padding:9px 14px;border-radius:4px;cursor:pointer;font-size:13px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);
+    border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  th, td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
+  th{color:var(--ink-faint);font-weight:600;font-size:12px;background:#161f34;}
+  tr:last-child td{border-bottom:none;}
+  .table-scroll{overflow-x:auto;border-radius:6px;}
+
+  select.status-select{
+    background:#101827;color:var(--ink);border:1px solid var(--line);border-radius:4px;
+    padding:6px 8px;font-size:12.5px;font-family:inherit;
+  }
+  select.status-select.paid{color:#8fd4cc;}
+  select.status-select.pending{color:#e8c67e;}
+  select.status-select.cancelled{color:#e2a8a4;}
+
+  .email-cell{display:flex;align-items:center;gap:8px;}
+  .email-cell .fail{color:#e2a8a4;}
+  .email-cell .ok{color:#8fd4cc;}
+  .resend-btn{
+    background:transparent;border:1px solid var(--warn);color:#e2a8a4;
+    font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;white-space:nowrap;
+  }
+  .resend-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .amount-cell{font-family:'Sora',sans-serif;font-weight:600;color:var(--gold);}
+
+  .mode-panel{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+    border:1px solid var(--line);background:var(--card);border-radius:6px;
+    padding:16px 20px;margin-bottom:20px;
+  }
+  .mode-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13.5px;}
+  .mode-info .k{color:var(--ink-faint);}
+  .mode-badge{padding:4px 12px;border-radius:999px;font-weight:700;font-size:13px;}
+  .mode-badge.open{background:rgba(47,156,147,0.16);color:#8fd4cc;}
+  .mode-badge.closed{background:rgba(181,80,74,0.16);color:#e2a8a4;}
+  .mode-badge.waiting{background:rgba(201,154,63,0.16);color:#e8c67e;}
+  .mode-desc{color:var(--ink-dim);font-size:12.5px;}
+  .mode-actions{display:flex;gap:10px;align-items:center;}
+  .mode-actions select{
+    background:#101827;color:var(--ink);border:1px solid var(--line);border-radius:4px;
+    padding:8px 10px;font-size:13px;font-family:inherit;
+  }
+  .mode-actions button{
+    background:var(--gold);color:var(--bg-0);border:none;font-weight:700;font-size:13px;
+    padding:9px 16px;border-radius:4px;cursor:pointer;
+  }
+  .mode-actions button:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .reserve-panel{
+    border:1px solid var(--line);background:var(--card);border-radius:6px;
+    padding:16px 20px;margin-bottom:20px;
+  }
+  .reserve-title{font-size:13.5px;margin-bottom:10px;}
+  .reserve-title .reserve-hint{color:var(--ink-faint);font-size:12px;margin-left:10px;}
+  .reserve-form{display:flex;gap:10px;flex-wrap:wrap;}
+  .reserve-form input{
+    padding:9px 12px;border-radius:4px;border:1px solid var(--line);
+    background:#101827;color:var(--ink);font-size:13px;font-family:inherit;
+  }
+  .reserve-form input[type=text]{flex:1;min-width:220px;}
+  .reserve-form input[type=number]{width:90px;}
+  .reserve-form button{
+    background:var(--gold);color:var(--bg-0);border:none;font-weight:700;font-size:13px;
+    padding:9px 16px;border-radius:4px;cursor:pointer;
+  }
+  .reserve-form button:disabled{opacity:0.5;cursor:not-allowed;}
+  .reserved-badge{
+    display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;
+    background:rgba(255,255,255,0.08);color:var(--ink-dim);margin-right:8px;
+  }
+  .remove-btn{
+    background:transparent;border:1px solid var(--line);color:var(--ink-faint);
+    font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;
+  }
+  tr.reserved-row td{color:var(--ink-dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="login-box" id="loginBox">
+    <h1 style="margin-bottom:6px;">財務後台</h1>
+    <p style="color:var(--ink-faint);font-size:13px;margin-bottom:20px;">請輸入管理密碼</p>
+    <input type="password" id="passwordInput" placeholder="密碼">
+    <button id="loginBtn">登入</button>
+    <div class="login-error" id="loginError">密碼錯誤，請再試一次。</div>
+  </div>
+
+  <div id="dashboard">
+    <h1>認購訂單管理</h1>
+
+    <div class="mode-panel">
+      <div class="mode-info">
+        <span class="k">預購頁狀態</span>
+        <span class="mode-badge" id="modeBadge">載入中…</span>
+        <span class="mode-desc" id="modeDesc"></span>
+      </div>
+      <div class="mode-actions">
+        <select id="modeSelect">
+          <option value="auto">依排程自動</option>
+          <option value="open">強制開放</option>
+          <option value="closed">強制關閉</option>
+        </select>
+        <button id="modeApplyBtn">套用</button>
+      </div>
+    </div>
+
+    <div class="reserve-panel">
+      <div class="reserve-title">保留酒款<span class="reserve-hint">先從總量扣除、不開放認購；會出現在下方表格，狀態為「保留」</span></div>
+      <div class="reserve-form">
+        <input type="text" id="reserveLabel" placeholder="用途說明，例如：感謝致贈（院長）">
+        <input type="number" id="reserveBottles" min="1" value="1" title="支數">
+        <button id="reserveAddBtn">新增保留</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="搜尋姓名 / 班級 / 信箱">
+      <span class="stat" id="countStat"></span>
+      <button class="refresh" id="refreshBtn">重新整理</button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>時間</th><th>姓名</th><th>班級</th>
+            <th>心意</th><th>經典</th><th>尊榮</th><th>主酒支數</th><th>應付金額</th>
+            <th>末五碼</th><th>電話</th><th>信箱</th><th>宅配地址</th>
+            <th>確認信狀態</th><th>狀態通知信</th><th>狀態</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdgdRUvqsHWUcP6rF70dPN3Vs2Na65ak8yjcTrzhmDB2lWEqWH2s6S-MaJrWO5jwpj0g/exec';
+let password = '';
+let allOrders = [];
+let currentSettings = null;
+
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+async function login() {
+  const input = document.getElementById('passwordInput').value;
+  const res = await fetch(SCRIPT_URL + '?action=admin_list&password=' + encodeURIComponent(input));
+  const data = await res.json();
+  if (!data.ok) {
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+  password = input;
+  sessionStorage.setItem('adminPassword', password);
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  allOrders = data.orders;
+  if (data.settings) renderSettings(data.settings);
+  renderTable(filterOrders());
+}
+
+async function reload() {
+  const res = await fetch(SCRIPT_URL + '?action=admin_list&password=' + encodeURIComponent(password));
+  const data = await res.json();
+  if (data.ok) {
+    allOrders = data.orders;
+    if (data.settings) renderSettings(data.settings);
+    renderTable(filterOrders());
+  }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', reload);
+document.getElementById('searchInput').addEventListener('input', () => renderTable(filterOrders()));
+
+function filterOrders() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) return allOrders;
+  return allOrders.filter(o =>
+    (o.name || '').toLowerCase().includes(q) ||
+    (o.className || '').toLowerCase().includes(q) ||
+    (o.email || '').toLowerCase().includes(q)
+  );
+}
+
+document.getElementById('reserveAddBtn').addEventListener('click', async () => {
+  const labelEl = document.getElementById('reserveLabel');
+  const bottlesEl = document.getElementById('reserveBottles');
+  const btn = document.getElementById('reserveAddBtn');
+  const label = labelEl.value.trim();
+  const bottles = parseInt(bottlesEl.value, 10) || 0;
+
+  if (!label || bottles <= 0) { alert('請填寫用途說明，且支數需大於 0'); return; }
+  if (!confirm('確定要保留主酒嗎？\n\n用途：' + label + '\n支數：' + bottles + ' 支\n\n這會立刻從開放認購的總量中扣除。')) return;
+
+  btn.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_add_reserved', password, label, bottles }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      labelEl.value = '';
+      bottlesEl.value = 1;
+      await reload();
+    } else {
+      alert(data.error || '新增失敗');
+    }
+  } catch (err) {
+    alert('網路連線異常，請稍後再試');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function removeReserved(o, btnEl) {
+  if (!confirm('確定要移除這筆保留嗎？\n\n' + o.name + '（' + o.mainWineNeeded + ' 支）\n\n移除後這些主酒會回到開放認購的總量。')) return;
+  btnEl.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_remove_reserved', password, orderId: o.orderId }),
+    });
+    const data = await res.json();
+    if (data.ok) { await reload(); } else { alert(data.error || '移除失敗'); btnEl.disabled = false; }
+  } catch (err) {
+    alert('網路連線異常，請稍後再試');
+    btnEl.disabled = false;
+  }
+}
+
+function formatLaunch(iso) {
+  return new Date(iso).toLocaleString('zh-TW', { dateStyle: 'long', timeStyle: 'short' });
+}
+
+function renderSettings(s) {
+  const badge = document.getElementById('modeBadge');
+  const desc = document.getElementById('modeDesc');
+  const modeText = { auto: '依排程自動', open: '強制開放', closed: '強制關閉' }[s.mode];
+
+  if (s.isOpen) {
+    badge.textContent = '開放中';
+    badge.className = 'mode-badge open';
+  } else if (s.mode === 'closed') {
+    badge.textContent = '已關閉';
+    badge.className = 'mode-badge closed';
+  } else {
+    badge.textContent = '尚未開放';
+    badge.className = 'mode-badge waiting';
+  }
+  desc.textContent = '目前模式：' + modeText + '｜排程開放時間：' + formatLaunch(s.launchAt);
+  document.getElementById('modeSelect').value = s.mode;
+  currentSettings = s;
+}
+
+document.getElementById('modeApplyBtn').addEventListener('click', async () => {
+  const select = document.getElementById('modeSelect');
+  const btn = document.getElementById('modeApplyBtn');
+  const newMode = select.value;
+  if (currentSettings && newMode === currentSettings.mode) return;
+
+  const launch = currentSettings ? formatLaunch(currentSettings.launchAt) : '';
+  const explain = {
+    auto: '改為「依排程自動」：到 ' + launch + ' 才會開放，在那之前民眾看到的是「尚未開放」。',
+    open: '改為「強制開放」：預購頁會立刻開放，不受排程時間限制。',
+    closed: '改為「強制關閉」：預購頁會立刻停止接受新訂單，已送出的訂單不受影響。',
+  }[newMode];
+
+  if (!confirm('確定要切換預購頁的開關嗎？\n\n' + explain)) {
+    if (currentSettings) select.value = currentSettings.mode;
+    return;
+  }
+
+  btn.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_set_mode', password, mode: newMode }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      renderSettings(data.settings);
+    } else {
+      alert(data.error || '切換失敗');
+      if (currentSettings) select.value = currentSettings.mode;
+    }
+  } catch (err) {
+    alert('網路連線異常，請稍後再試');
+    if (currentSettings) select.value = currentSettings.mode;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function statusClass(s) {
+  if (s === '已付款') return 'paid';
+  if (s === '逾期付款被取消') return 'cancelled';
+  return 'pending';
+}
+
+function formatCurrency(n) {
+  return 'NT$' + (Number(n) || 0).toLocaleString('en-US');
+}
+
+function renderTable(orders) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('countStat').textContent = `共 ${orders.length} 筆`;
+
+  orders.forEach(o => {
+    const tr = document.createElement('tr');
+    const time = o.time ? new Date(o.time).toLocaleString('zh-TW', { dateStyle: 'short', timeStyle: 'short' }) : '';
+    tr.innerHTML = `
+      <td>${time}</td>
+      <td>${escapeHtml(o.name)}</td>
+      <td>${escapeHtml(o.className)}</td>
+      <td>${o.qtyBasic}</td>
+      <td>${o.qtyClassic}</td>
+      <td>${o.qtyPremium}</td>
+      <td>${o.mainWineNeeded}</td>
+      <td class="amount-cell">${formatCurrency(o.totalAmount)}</td>
+      <td>${escapeHtml(o.transferLast5)}</td>
+      <td>${escapeHtml(o.phone)}</td>
+      <td>${escapeHtml(o.email)}</td>
+      <td>${escapeHtml(o.deliveryAddress)}</td>
+      <td></td>
+      <td>${escapeHtml(o.statusEmailStatus)}</td>
+      <td></td>
+    `;
+
+    // 保留酒款：不是真實訂單，只顯示標籤與移除按鈕
+    if (o.status === '保留') {
+      tr.classList.add('reserved-row');
+      tr.children[12].textContent = '—';
+      tr.children[13].textContent = '—';
+      const badge = document.createElement('span');
+      badge.className = 'reserved-badge';
+      badge.textContent = '保留';
+      const rm = document.createElement('button');
+      rm.className = 'remove-btn';
+      rm.textContent = '移除';
+      rm.addEventListener('click', () => removeReserved(o, rm));
+      tr.children[14].appendChild(badge);
+      tr.children[14].appendChild(rm);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    // 確認信狀態欄：失敗時附上補寄按鈕
+    const confirmEmailTd = tr.children[12];
+    const isFail = (o.confirmEmailStatus || '').indexOf('失敗') !== -1;
+    const emailCellDiv = document.createElement('div');
+    emailCellDiv.className = 'email-cell';
+    const emailText = document.createElement('span');
+    emailText.textContent = o.confirmEmailStatus || '（尚未寄送）';
+    emailText.className = isFail ? 'fail' : 'ok';
+    emailCellDiv.appendChild(emailText);
+    if (isFail) {
+      const resendBtn = document.createElement('button');
+      resendBtn.className = 'resend-btn';
+      resendBtn.textContent = '補寄';
+      resendBtn.addEventListener('click', () => resendEmail(o.orderId, resendBtn, emailText));
+      emailCellDiv.appendChild(resendBtn);
+    }
+    confirmEmailTd.appendChild(emailCellDiv);
+
+    // 狀態欄：下拉選單 + 送出前彈出確認視窗
+    const statusTd = tr.children[14];
+    const select = document.createElement('select');
+    select.className = 'status-select ' + statusClass(o.status);
+    let previousValue = o.status;
+    ['付款待確認', '已付款', '逾期付款被取消'].forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      if (s === o.status) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', () => {
+      const newStatus = select.value;
+      if (newStatus === previousValue) return;
+      const confirmed = confirm(
+        '確定要更改以下訂單的狀態嗎？\n\n' +
+        '姓名：' + o.name + '（' + o.className + '）\n' +
+        '應付金額：' + formatCurrency(o.totalAmount) + '\n' +
+        '狀態變更：「' + previousValue + '」→「' + newStatus + '」\n\n' +
+        '確定後系統會立即寄送狀態通知信給訂購人。'
+      );
+      if (!confirmed) {
+        select.value = previousValue;
+        return;
+      }
+      updateStatus(o, newStatus, select, (success) => {
+        if (success) {
+          previousValue = newStatus;
+          o.status = newStatus;
+        } else {
+          select.value = previousValue;
+        }
+      });
+    });
+    statusTd.appendChild(select);
+
+    tbody.appendChild(tr);
+  });
+}
+
+async function updateStatus(o, newStatus, selectEl, done) {
+  selectEl.disabled = true;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_update_status', password, orderId: o.orderId, status: newStatus }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      selectEl.className = 'status-select ' + statusClass(newStatus);
+      done(true);
+    } else {
+      alert(data.error || '更新失敗');
+      done(false);
+    }
+  } catch (err) {
+    alert('網路連線異常，請稍後再試');
+    done(false);
+  } finally {
+    selectEl.disabled = false;
+  }
+}
+
+async function resendEmail(orderId, btnEl, textEl) {
+  btnEl.disabled = true;
+  btnEl.textContent = '寄送中…';
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'admin_resend_email', password, orderId }),
+    });
+    const data = await res.json();
+    if (data.ok && data.emailSent) {
+      textEl.textContent = '已寄送';
+      textEl.className = 'ok';
+      btnEl.remove();
+    } else {
+      textEl.textContent = data.status || '仍然失敗';
+      btnEl.disabled = false;
+      btnEl.textContent = '再試一次';
+    }
+  } catch (err) {
+    btnEl.disabled = false;
+    btnEl.textContent = '再試一次';
+    alert('網路連線異常，請稍後再試');
+  }
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const savedPassword = sessionStorage.getItem('adminPassword');
+if (savedPassword) {
+  document.getElementById('passwordInput').value = savedPassword;
+  login();
+}
+</script>
+</body>
+</html>
