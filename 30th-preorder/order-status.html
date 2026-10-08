@@ -69,7 +69,8 @@
       <div class="row"><span class="k">心意典藏組</span><span class="v" id="oBasic"></span></div>
       <div class="row"><span class="k">經典典藏組</span><span class="v" id="oClassic"></span></div>
       <div class="row"><span class="k">尊榮典藏組</span><span class="v" id="oPremium"></span></div>
-      <div class="row"><span class="k">動用主酒</span><span class="v" id="oNeeded"></span></div>
+      <div class="row"><span class="k">30年紀念酒</span><span class="v" id="oNeeded"></span></div>
+      <div class="row"><span class="k">義父IF 加贈</span><span class="v" id="oGift"></span></div>
       <div class="row"><span class="k">應匯款金額</span><span class="v" id="oAmount" style="color:var(--gold);font-size:16px;"></span></div>
       <div class="row"><span class="k">宅配地址</span><span class="v" id="oAddress"></span></div>
       <div class="row"><span class="k">目前登記的末五碼</span><span class="v" id="oLast5"></span></div>
@@ -139,7 +140,8 @@ function render(order) {
   document.getElementById('oBasic').textContent = order.qtyBasic + ' 組';
   document.getElementById('oClassic').textContent = order.qtyClassic + ' 組';
   document.getElementById('oPremium').textContent = order.qtyPremium + ' 組';
-  document.getElementById('oNeeded').textContent = order.mainWineNeeded + ' 支';
+  document.getElementById('oNeeded').textContent = order.mainWineNeeded + ' 瓶';
+  document.getElementById('oGift').textContent = Number(order.qtyPremium) > 0 ? (Number(order.giftBottles) || 0) + ' 瓶' : '—';
   document.getElementById('oAmount').textContent = 'NT$' + Number(order.totalAmount || 0).toLocaleString('en-US');
   document.getElementById('oAddress').textContent = order.deliveryAddress;
   document.getElementById('oLast5').textContent = order.transferLast5 || '（尚未填寫）';
