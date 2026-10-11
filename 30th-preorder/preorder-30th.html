@@ -211,6 +211,24 @@
   .loading-note{font-size:12.5px;color:var(--ink-faint);margin-top:10px;}
 
   #mainContent{display:none;}
+
+  /* ---- Loading ---- */
+  .loading-panel{
+    border:1px solid var(--line);background:var(--card);border-radius:6px;
+    padding:44px 30px;text-align:center;color:var(--ink-dim);font-size:14px;
+  }
+  .loading-panel p{margin:14px 0 0;}
+  .loading-panel button{
+    margin-top:16px;background:var(--gold);color:var(--bg-0);border:none;font-weight:700;
+    font-size:14px;padding:10px 20px;border-radius:4px;cursor:pointer;
+  }
+  .spinner{
+    width:24px;height:24px;margin:0 auto;border-radius:50%;
+    border:3px solid rgba(255,255,255,0.12);border-top-color:var(--gold);
+    animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion: reduce){ .spinner{animation:none;} }
 </style>
 </head>
 <body>
@@ -250,7 +268,13 @@
     <p class="quota-total">扣除上述 5 瓶後，本次開放給全體搶購的實際總數量為 <strong>495 瓶</strong>。</p>
   </div>
 
-  <div class="locked-panel" id="lockedPanel">
+  <div class="loading-panel" id="loadingPanel">
+    <div class="spinner" id="loadingSpinner"></div>
+    <p id="loadingPanelText">載入中，請稍候…</p>
+    <button type="button" id="loadingRetryBtn" style="display:none;">重新載入</button>
+  </div>
+
+  <div class="locked-panel" id="lockedPanel" style="display:none;">
     <div class="eyebrow" id="lockedEyebrow">尚未開放</div>
     <h2 id="lockedTitle">認購登記尚未開始</h2>
     <div class="locked-time" id="lockedTimeText">載入中…</div>
@@ -416,6 +440,7 @@ let currentStats = null;
 
 function renderStats(stats) {
   currentStats = stats;
+  document.getElementById('loadingPanel').style.display = 'none';
 
   if (stats.isOpen === false) {
     els.lockedPanel.style.display = 'block';
@@ -473,14 +498,30 @@ function updateNeeded() {
 [els.qtyBasic, els.qtyClassic, els.qtyPremium].forEach(el => el.addEventListener('input', updateNeeded));
 
 async function loadStats() {
-  try {
-    const res = await fetch(SCRIPT_URL, { method: 'GET' });
-    const data = await res.json();
-    if (data.ok) renderStats(data);
-  } catch (err) {
-    els.loadingNote.textContent = '目前無法讀取即時庫存，請稍後重新整理頁面。';
+  let data = null;
+  for (let t = 1; t <= 4 && !data; t++) {   // Apps Script 偶爾回 404，自動重試
+    try {
+      const res = await fetch(SCRIPT_URL, { method: 'GET' });
+      const d = await res.json();
+      if (d.ok) data = d;
+    } catch (err) { /* 下面統一處理 */ }
+    if (!data && t < 4) await new Promise(r => setTimeout(r, 1200 * t));
+  }
+  if (data) {
+    renderStats(data);
+  } else {
+    document.getElementById('loadingSpinner').style.display = 'none';
+    document.getElementById('loadingPanelText').textContent = '目前無法讀取認購資訊，請檢查網路後重新載入。';
+    document.getElementById('loadingRetryBtn').style.display = 'inline-block';
   }
 }
+
+document.getElementById('loadingRetryBtn').addEventListener('click', () => {
+  document.getElementById('loadingSpinner').style.display = 'block';
+  document.getElementById('loadingPanelText').textContent = '載入中，請稍候…';
+  document.getElementById('loadingRetryBtn').style.display = 'none';
+  loadStats();
+});
 
 const PRICES = { basic: 12800, classic: 38400, premium: 76800 };
 
