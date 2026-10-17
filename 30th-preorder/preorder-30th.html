@@ -43,6 +43,27 @@
   h1{font-size:clamp(24px,4vw,32px);margin:0 0 10px;font-weight:800;}
   .sub{color:var(--ink-dim);font-size:14.5px;margin:0 0 36px;max-width:56ch;}
 
+  /* ---- Countdown ---- */
+  .countdown{
+    border:1px solid rgba(212,175,90,0.55);border-radius:8px;padding:22px 18px;margin-bottom:28px;
+    background:linear-gradient(155deg,#2a2412,#1c2236 70%);text-align:center;
+    box-shadow:0 0 0 1px rgba(212,175,90,0.12),0 8px 30px rgba(0,0,0,0.35);
+  }
+  .cd-label{font-size:14px;font-weight:700;color:var(--gold);letter-spacing:0.08em;margin-bottom:12px;}
+  .cd-timer{display:flex;justify-content:center;gap:10px;}
+  .cd-unit{min-width:68px;padding:10px 6px 8px;background:#0e1424;border:1px solid var(--line);border-radius:6px;}
+  .cd-unit span{
+    display:block;font-family:'Sora',sans-serif;font-weight:800;line-height:1.1;color:var(--ink);
+    font-size:clamp(26px,7vw,40px);font-variant-numeric:tabular-nums;
+  }
+  .cd-unit small{display:block;font-size:12px;color:var(--ink-faint);margin-top:4px;}
+  .cd-note{margin-top:14px;font-size:13.5px;color:var(--ink-dim);line-height:1.7;}
+  .cd-note strong{color:var(--gold);}
+  .countdown.urgent{border-color:rgba(226,100,90,0.7);background:linear-gradient(155deg,#34161a,#1c2236 70%);}
+  .countdown.urgent .cd-label{color:#f0a49e;}
+  .countdown.urgent .cd-unit span{color:#ffd9d5;}
+  @media (max-width:420px){ .cd-timer{gap:7px;} .cd-unit{min-width:58px;} }
+
   /* ---- Story ---- */
   .story{
     border-left:3px solid var(--gold);background:linear-gradient(155deg,var(--card-hi),var(--card) 70%);
@@ -236,7 +257,18 @@
 
   <div class="eyebrow">NTU EMBA 30TH ANNIVERSARY</div>
   <h1>台大 EMBA 30週年紀念酒 認購登記</h1>
-  <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，30年紀念酒開放認購 495 瓶，額滿即停止開放。</p>
+  <p class="sub">傳承・共創・創新。請填寫以下資料完成認購登記，本次限量 30 瓶，額滿即停止開放。</p>
+
+  <div class="countdown" id="countdown" style="display:none;" role="timer" aria-label="認購截止倒數">
+    <div class="cd-label" id="cdLabel">距離認購截止</div>
+    <div class="cd-timer">
+      <div class="cd-unit"><span id="cdDays">--</span><small>天</small></div>
+      <div class="cd-unit"><span id="cdHours">--</span><small>時</small></div>
+      <div class="cd-unit"><span id="cdMins">--</span><small>分</small></div>
+      <div class="cd-unit"><span id="cdSecs">--</span><small>秒</small></div>
+    </div>
+    <div class="cd-note" id="cdNote"></div>
+  </div>
 
   <div class="story">
     <h2>臺大 EMBA 三十週年｜珍藏情誼，期待再相聚</h2>
@@ -438,27 +470,91 @@ const els = {
 
 let currentStats = null;
 
+// 剛送出訂單成功時，即使這筆剛好買完最後的名額，也要讓買家看完成功訊息，不能立刻被換成「已額滿」畫面
+let orderJustCompleted = false;
+
+function lockedView(stats) {
+  if (stats.mode === 'closed') {
+    return { eyebrow: '暫停開放', title: '認購登記目前暫停', time: '', desc: '如有疑問請聯繫學生會，重新開放時會另行公告。' };
+  }
+  if (stats.isOpen === false && stats.ended) {
+    return { eyebrow: '認購已截止', title: '本次認購已截止', time: '', desc: '感謝大家的支持，如有疑問歡迎加入下方的 LINE 社群詢問。' };
+  }
+  if (stats.isOpen === false) {
+    const t = stats.launchAt
+      ? new Date(stats.launchAt).toLocaleString('zh-TW', { dateStyle: 'long', timeStyle: 'short' }) + ' 開放' : '';
+    return { eyebrow: '尚未開放', title: '認購登記尚未開始', time: t, desc: '時間一到頁面會自動開放，屆時重新整理即可看到表單。' };
+  }
+  return { eyebrow: '已額滿', title: '本次限量已全數認購完畢', time: '', desc: '感謝大家的支持，表單已關閉。' };
+}
+
+// ---- 倒數計時 ----
+let countdownEndMs = null, countdownOffsetMs = 0, countdownIntervalId = null;
+
+function fmtTaipei(iso) {
+  const parts = new Intl.DateTimeFormat('zh-TW', {
+    timeZone: 'Asia/Taipei', year: 'numeric', month: 'numeric', day: 'numeric',
+    weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(iso));
+  const g = t => (parts.find(p => p.type === t) || {}).value || '';
+  return `${g('year')} 年 ${g('month')} 月 ${g('day')} 日（${g('weekday')}）${g('hour')}:${g('minute')}`;
+}
+
+function startCountdown(stats) {
+  countdownEndMs = new Date(stats.saleEndAt).getTime();
+  // 用後端回傳的伺服器時間校正，避免使用者電腦時間不準而倒數錯誤
+  countdownOffsetMs = stats.serverTime ? new Date(stats.serverTime).getTime() - Date.now() : 0;
+  document.getElementById('cdNote').innerHTML =
+    '即日起至 <strong>' + fmtTaipei(stats.saleEndAt) + '</strong> 截止｜限量 <strong>' +
+    (stats.saleLimit || stats.mainWineTotal) + ' 瓶</strong>，額滿將提前關閉表單！';
+  document.getElementById('countdown').style.display = 'block';
+  if (countdownIntervalId) clearInterval(countdownIntervalId);
+  tickCountdown();
+  countdownIntervalId = setInterval(tickCountdown, 1000);
+}
+
+function stopCountdown() {
+  if (countdownIntervalId) clearInterval(countdownIntervalId);
+  countdownIntervalId = null;
+  document.getElementById('countdown').style.display = 'none';
+}
+
+function tickCountdown() {
+  const left = countdownEndMs - (Date.now() + countdownOffsetMs);
+  if (left <= 0) {            // 時間到：重新向後端確認狀態，頁面會自動換成「已截止」
+    stopCountdown();
+    loadStats();
+    return;
+  }
+  const pad = n => String(n).padStart(2, '0');
+  const total = Math.floor(left / 1000);
+  document.getElementById('cdDays').textContent = pad(Math.floor(total / 86400));
+  document.getElementById('cdHours').textContent = pad(Math.floor((total % 86400) / 3600));
+  document.getElementById('cdMins').textContent = pad(Math.floor((total % 3600) / 60));
+  document.getElementById('cdSecs').textContent = pad(total % 60);
+  const urgent = left < 24 * 3600 * 1000;
+  document.getElementById('countdown').classList.toggle('urgent', urgent);
+  document.getElementById('cdLabel').textContent = urgent ? '最後 24 小時，把握機會！' : '距離認購截止';
+}
+
 function renderStats(stats) {
   currentStats = stats;
   document.getElementById('loadingPanel').style.display = 'none';
 
-  if (stats.isOpen === false) {
+  const soldOut = stats.mainWineRemaining <= 0;
+
+  // 倒數計時：開放中、尚未截止、還有庫存時才顯示
+  if (stats.isOpen !== false && !stats.ended && !soldOut && stats.saleEndAt) startCountdown(stats);
+  else stopCountdown();
+
+  if (!orderJustCompleted && (stats.isOpen === false || soldOut)) {
+    const v = lockedView(stats);
     els.lockedPanel.style.display = 'block';
     els.mainContent.style.display = 'none';
-    if (stats.mode === 'closed') {
-      document.getElementById('lockedEyebrow').textContent = '暫停開放';
-      document.getElementById('lockedTitle').textContent = '認購登記目前暫停';
-      els.lockedTimeText.textContent = '';
-      document.getElementById('lockedDesc').textContent = '如有疑問請聯繫學生會，重新開放時會另行公告。';
-    } else {
-      document.getElementById('lockedEyebrow').textContent = '尚未開放';
-      document.getElementById('lockedTitle').textContent = '認購登記尚未開始';
-      document.getElementById('lockedDesc').textContent = '時間一到頁面會自動開放，屆時重新整理即可看到表單。';
-      if (stats.launchAt) {
-        const d = new Date(stats.launchAt);
-        els.lockedTimeText.textContent = d.toLocaleString('zh-TW', { dateStyle: 'long', timeStyle: 'short' }) + ' 開放';
-      }
-    }
+    document.getElementById('lockedEyebrow').textContent = v.eyebrow;
+    document.getElementById('lockedTitle').textContent = v.title;
+    els.lockedTimeText.textContent = v.time;
+    document.getElementById('lockedDesc').textContent = v.desc;
     return;
   }
 
@@ -466,7 +562,7 @@ function renderStats(stats) {
   els.mainContent.style.display = 'block';
 
   els.mainRemainingText.textContent = `${stats.mainWineRemaining} / ${stats.mainWineTotal} 瓶`;
-  const pct = Math.max(0, Math.min(100, (stats.mainWineUsed / stats.mainWineTotal) * 100));
+  const pct = stats.mainWineTotal > 0 ? Math.max(0, Math.min(100, (stats.mainWineUsed / stats.mainWineTotal) * 100)) : 100;
   els.mainBar.style.width = pct + '%';
 
   if (stats.mainWineRemaining <= 0) {
@@ -651,6 +747,7 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async () =
         '<br>我們已寄送確認信至您填寫的信箱' + (data.emailSent ? '' : '（但這次寄送似乎沒有成功，建議先收藏下方連結）') + '。' +
         '<br><a href="' + statusLink + '" style="color:#d4af5a;">點此查詢訂單狀態 / 補填轉帳末五碼</a>';
       els.successMsg.style.display = 'block';
+      orderJustCompleted = true;
       document.querySelector('#confirmPanel .confirm-actions').style.display = 'none';
       els.form.reset();
       renderStats(data.stats);
